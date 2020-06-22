@@ -15,6 +15,11 @@ export function activate(context: vscode.ExtensionContext) {
 			command.explorerContextCreateNote(fileUri, JournalrConfig.fromConfig());
 		})
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('journalr.insertAttachment', () => {
+			command.insertAttachment(JournalrConfig.fromConfig());
+		})
+	);
 }
 
 // this method is called when your extension is deactivated

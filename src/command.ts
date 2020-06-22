@@ -51,3 +51,35 @@ export function explorerContextCreateNote(fileUri: vscode.Uri, config: JournalrC
     vscode.window.showInformationMessage(`URI: ${noteUri}`);
     createNote(noteUri).then(openNote);
 }
+
+export function insertAttachment(config: JournalrConfig) {
+    const wsFolders = vscode.workspace.workspaceFolders;
+    if (!wsFolders) {
+        vscode.window.showInformationMessage("Unable to save attachments if there is no workspace");
+        return;
+    }
+
+    const activeEditor = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        vscode.window.showInformationMessage("Unable to save attachments without an active editor");
+        return;
+    }
+
+    vscode.window.showOpenDialog({ canSelectMany: false })
+    .then((fileUris?: vscode.Uri[]) => {
+        if (!fileUris) {
+            throw new Error("No file selected");
+        }
+        const fileUri = fileUris[0];
+
+        const extensionSplit = fileUri.fsPath.split('.');
+        const extension = extensionSplit.length > 1 ? `.${extensionSplit[extensionSplit.length - 1]}` : ``;
+        const attachmentName = moment().format(`${config.attachmentFormat}[${extension}]`);
+        const attachmentUri = vscode.Uri.joinPath(wsFolders[0].uri, attachmentName);
+
+        vscode.workspace.fs.copy(fileUri, attachmentUri).then(() => { 
+            const snippet = new vscode.SnippetString(`[$1](/${attachmentName})`);
+            activeEditor.insertSnippet(snippet);
+        });
+    });
+}

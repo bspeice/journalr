@@ -12,13 +12,19 @@
 	],
 	"activationEvents": [
 		"onCommand:journalr.createJournal",
-		"onCommand:journalr.explorerContextCreateNote"
+		"onCommand:journalr.explorerContextCreateNote",
+		"onCommand:journalr.insertAttachment"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"configuration": {
 			"title": "Journalr",
 			"properties": {
+				"journalr.attachmentFormat": {
+					"type": "string",
+					"default": "[_attachments]/YYYYMMDDhhmmss",
+					"markdownDescription": "Format string (e.g. `[_attachments]/YYYYMMDDhhmmss`) for note attachments when imported from the \"Insert Attachment\" command. See [`momentjs`](https://momentjs.com/docs/#/displaying/format/) for formatting options.\n\nFile extensions are preserved."
+				},
 				"journalr.contextMenuFormat": {
 					"type": "string",
 					"default": "YYYYMMDDhhmmss[.md]",
@@ -41,6 +47,11 @@
 				"command": "journalr.explorerContextCreateNote",
 				"title": "Create Note",
 				"category": "Journalr"
+			},
+			{
+				"command": "journalr.insertAttachment",
+				"title": "Insert Attachment",
+				"category": "Journalr"
 			}
 		],
 		"menus": {
@@ -48,6 +59,9 @@
 				{
 					"command": "journalr.explorerContextCreateNote",
 					"when": "false"
+				},
+				{
+					"command": "journalr.insertAttachment"
 				}
 			],
 			"explorer/context": [
