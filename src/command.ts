@@ -102,6 +102,6 @@ export async function insertImage(config: JournalrConfig) {
         return;
     }
 
-    const snippet = new vscode.SnippetString(`![$1](${attachmentName})`);
+    const snippet = new vscode.SnippetString(`![$1](/${attachmentName})`);
     return activeEditor.insertSnippet(snippet);
 }
