@@ -20,6 +20,11 @@ export function activate(context: vscode.ExtensionContext) {
 			command.insertAttachment(JournalrConfig.fromConfig());
 		})
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('journalr.insertImage', () => {
+			command.insertImage(JournalrConfig.fromConfig());
+		})
+	);
 }
 
 // this method is called when your extension is deactivated
