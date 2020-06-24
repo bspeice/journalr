@@ -14,19 +14,19 @@ async function openNote(fileUri: vscode.Uri): Promise<vscode.TextEditor> {
 
 export async function createJournal(config: JournalrConfig) {
     if (!config.journalFormats) {
-        vscode.window.showInformationMessage("No journal formats are currently configured.");
+        vscode.window.showWarningMessage("No journal formats are currently configured.");
         return;
     }
 
     const wsFolders = vscode.workspace.workspaceFolders;
     if (!wsFolders) {
-        vscode.window.showInformationMessage("Unable to create journal entry when there is no workspace");
+        vscode.window.showWarningMessage("Unable to create journal entry when there is no workspace");
         return;
     }
 
     const picked = await vscode.window.showQuickPick(config.journalFormats);
     if (!picked) {
-        vscode.window.showInformationMessage("Nothing was picked.");
+        vscode.window.showWarningMessage("Nothing was picked.");
         return;
     }
 
@@ -40,22 +40,20 @@ export async function createJournal(config: JournalrConfig) {
 
 export async function explorerContextCreateNote(fileUri: vscode.Uri, config: JournalrConfig) {
     if (!config.contextMenuFormat) {
-        vscode.window.showInformationMessage("No context menu format currently configured.");
+        vscode.window.showWarningMessage("No context menu format currently configured.");
         return;
     }
 
     const formatted = moment().format(config.contextMenuFormat);
-    vscode.window.showInformationMessage(`Formatted: ${formatted}`);
     const noteUri = vscode.Uri.joinPath(fileUri, formatted);
 
-    vscode.window.showInformationMessage(`URI: ${noteUri}`);
     createNote(noteUri).then(openNote);
 }
 
 async function importAttachment(config: JournalrConfig): Promise<string | undefined> {
     const wsFolders = vscode.workspace.workspaceFolders;
     if (!wsFolders) {
-        vscode.window.showInformationMessage("Unable to save attachments if there is no workspace");
+        vscode.window.showWarningMessage("Unable to save attachments if there is no workspace");
         return;
     }
 
@@ -77,7 +75,7 @@ async function importAttachment(config: JournalrConfig): Promise<string | undefi
 export async function insertAttachment(config: JournalrConfig) {
     const activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
-        vscode.window.showInformationMessage("Unable to save attachments without an active editor");
+        vscode.window.showWarningMessage("Unable to save attachments without an active editor");
         return Promise.reject();
     }
 
@@ -93,7 +91,7 @@ export async function insertAttachment(config: JournalrConfig) {
 export async function insertImage(config: JournalrConfig) {
     const activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
-        vscode.window.showInformationMessage("Unable to save attachments without an active editor");
+        vscode.window.showWarningMessage("Unable to save attachments without an active editor");
         return Promise.reject();
     }
 
