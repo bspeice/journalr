@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { JournalrConfig } from "./config";
 
 import { insertAttachment, insertImage } from "./command/attachment";
-import { menuCreateNote } from "./command/explorer";
+import { menuCreateNote, menuCopyId } from "./command/explorer";
 import { createJournal } from "./command/journal";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -10,14 +10,6 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("journalr.createJournal", () => {
       createJournal(JournalrConfig.fromConfig());
     })
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "journalr.explorerContextCreateNote",
-      (fileUri: vscode.Uri) => {
-        menuCreateNote(fileUri, JournalrConfig.fromConfig());
-      }
-    )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.insertAttachment", () => {
@@ -28,6 +20,23 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("journalr.insertImage", () => {
       insertImage();
     })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.explorerContextCreateNote",
+      (fileUri: vscode.Uri) => {
+        menuCreateNote(fileUri, JournalrConfig.fromConfig());
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.explorerContextCopyId",
+      (fileUri: vscode.Uri) => {
+        menuCopyId(fileUri, JournalrConfig.fromConfig());
+      }
+    )
   );
 }
 

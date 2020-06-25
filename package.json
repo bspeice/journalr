@@ -12,9 +12,10 @@
   ],
   "activationEvents": [
     "onCommand:journalr.createJournal",
-    "onCommand:journalr.explorerContextCreateNote",
     "onCommand:journalr.insertAttachment",
-    "onCommand:journalr.insertImage"
+    "onCommand:journalr.insertImage",
+    "onCommand:journalr.explorerContextCreateNote",
+    "onCommand:journalr.explorerContextCopyId"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -45,11 +46,6 @@
         "category": "Journalr"
       },
       {
-        "command": "journalr.explorerContextCreateNote",
-        "title": "Create Note",
-        "category": "Journalr"
-      },
-      {
         "command": "journalr.insertAttachment",
         "title": "Insert Attachment",
         "category": "Journalr"
@@ -58,6 +54,16 @@
         "command": "journalr.insertImage",
         "title": "Insert Image",
         "category": "Journalr"
+      },
+      {
+        "command": "journalr.explorerContextCreateNote",
+        "title": "Create Note",
+        "category": "Journalr"
+      },
+      {
+        "command": "journalr.explorerContextCopyId",
+        "title": "Copy Note ID",
+        "category": "Journalr"
       }
     ],
     "menus": {
@@ -65,12 +71,21 @@
         {
           "command": "journalr.explorerContextCreateNote",
           "when": "false"
+        },
+        {
+          "command": "journalr.explorerContextCopyId",
+          "when": "false"
         }
       ],
       "explorer/context": [
         {
           "command": "journalr.explorerContextCreateNote",
           "when": "explorerResourceIsFolder",
+          "group": "2_workspace"
+        },
+        {
+          "command": "journalr.explorerContextCopyId",
+          "when": "!explorerResourceIsFolder",
           "group": "2_workspace"
         }
       ]
