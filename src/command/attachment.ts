@@ -80,5 +80,5 @@ export async function insertAttachment() {
 }
 
 export async function insertImage() {
-  return await importFormattedAttachment((n, i) => `![$$(i + 1)](/${n})`);
+  return await importFormattedAttachment((n, i) => `![$${i + 1}](/${n})`);
 }
