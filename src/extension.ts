@@ -21,12 +21,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.insertAttachment", () => {
-      insertAttachment(JournalrConfig.fromConfig());
+      insertAttachment();
     })
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.insertImage", () => {
-      insertImage(JournalrConfig.fromConfig());
+      insertImage();
     })
   );
 }
