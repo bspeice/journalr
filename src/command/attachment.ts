@@ -1,62 +1,6 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
-import { JournalrConfig } from "./config";
-
-async function createNote(fileUri: vscode.Uri): Promise<vscode.Uri> {
-  await vscode.workspace.fs.writeFile(fileUri, new Uint8Array());
-  return fileUri;
-}
-
-async function openNote(fileUri: vscode.Uri): Promise<vscode.TextEditor> {
-  const doc = await vscode.workspace.openTextDocument(fileUri);
-  return await vscode.window.showTextDocument(doc);
-}
-
-export async function createJournal(config: JournalrConfig) {
-  if (!config.journalFormats) {
-    vscode.window.showWarningMessage(
-      "No journal formats are currently configured."
-    );
-    return;
-  }
-
-  const wsFolders = vscode.workspace.workspaceFolders;
-  if (!wsFolders) {
-    vscode.window.showWarningMessage(
-      "Unable to create journal entry when there is no workspace"
-    );
-    return;
-  }
-
-  const picked = await vscode.window.showQuickPick(config.journalFormats);
-  if (!picked) {
-    vscode.window.showWarningMessage("Nothing was picked.");
-    return;
-  }
-
-  const rootUri = wsFolders[0].uri;
-  const formatted = moment().format(picked);
-  const journalUri = vscode.Uri.joinPath(rootUri, formatted);
-
-  createNote(journalUri).then(openNote);
-}
-
-export async function explorerContextCreateNote(
-  fileUri: vscode.Uri,
-  config: JournalrConfig
-) {
-  if (!config.contextMenuFormat) {
-    vscode.window.showWarningMessage(
-      "No context menu format currently configured."
-    );
-    return;
-  }
-
-  const formatted = moment().format(config.contextMenuFormat);
-  const noteUri = vscode.Uri.joinPath(fileUri, formatted);
-
-  createNote(noteUri).then(openNote);
-}
+import { JournalrConfig } from "../config";
 
 async function importAttachment(
   config: JournalrConfig
