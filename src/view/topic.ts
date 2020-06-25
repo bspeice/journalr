@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
-import { TopicDb } from "../topicdb";
-
-class Topic extends vscode.TreeItem {}
+import { TopicDb, Topic } from "../topicdb";
 
 export class TopicBrowserProvider implements vscode.TreeDataProvider<Topic> {
   private _onDidChangeTreeData: vscode.EventEmitter<
@@ -17,7 +15,6 @@ export class TopicBrowserProvider implements vscode.TreeDataProvider<Topic> {
   }
 
   refresh(): void {
-    vscode.window.showInformationMessage("Refreshing");
     this._onDidChangeTreeData.fire(undefined);
   }
 
@@ -26,6 +23,6 @@ export class TopicBrowserProvider implements vscode.TreeDataProvider<Topic> {
   }
 
   getChildren(element?: Topic | undefined): vscode.ProviderResult<Topic[]> {
-    throw new Error("Method not implemented.");
+    return [];
   }
 }

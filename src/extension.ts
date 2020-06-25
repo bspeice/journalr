@@ -4,7 +4,6 @@ import { JournalrConfig } from "./config";
 import { insertAttachment, insertImage } from "./command/attachment";
 import { menuCreateNote, menuCopyId } from "./command/explorer";
 import { createJournal } from "./command/journal";
-import * as topicBrowser from "./command/topic_browser";
 import { TopicBrowserProvider } from "./view/topic";
 import { currentDb } from "./topicdb";
 
@@ -50,10 +49,13 @@ export function activate(context: vscode.ExtensionContext) {
       topicProvider
     )
   );
+
+  // NOTE: registering `topicProvider.refresh` as a closure causes issues because `this`
+  // becomes undefined. WTF?
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "journalr.topicBrowser.refresh",
-      topicProvider.refresh
+      () => { topicProvider.refresh(); }
     )
   );
 }
