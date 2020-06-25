@@ -58,12 +58,12 @@
         "category": "Journalr"
       },
       {
-        "command": "journalr.explorerContextCreateNote",
+        "command": "journalr.explorer.createNote",
         "title": "Create Note",
         "category": "Journalr"
       },
       {
-        "command": "journalr.explorerContextCopyId",
+        "command": "journalr.explorer.copyId",
         "title": "Copy Note ID",
         "category": "Journalr"
       },
@@ -77,22 +77,22 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "journalr.explorerContextCreateNote",
+          "command": "journalr.explorer.createNote",
           "when": "false"
         },
         {
-          "command": "journalr.explorerContextCopyId",
+          "command": "journalr.explorer.copyId",
           "when": "false"
         }
       ],
       "explorer/context": [
         {
-          "command": "journalr.explorerContextCreateNote",
+          "command": "journalr.explorer.createNote",
           "when": "explorerResourceIsFolder",
           "group": "2_workspace"
         },
         {
-          "command": "journalr.explorerContextCopyId",
+          "command": "journalr.explorer.copyId",
           "when": "!explorerResourceIsFolder",
           "group": "2_workspace"
         }

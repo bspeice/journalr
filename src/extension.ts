@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "journalr.explorerContextCreateNote",
+      "journalr.explorer.createNote",
       (fileUri: vscode.Uri) => {
         menuCreateNote(fileUri, JournalrConfig.fromConfig());
       }
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "journalr.explorerContextCopyId",
+      "journalr.explorer.copyId",
       (fileUri: vscode.Uri) => {
         menuCopyId(fileUri, JournalrConfig.fromConfig());
       }

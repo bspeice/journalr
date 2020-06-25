@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
 import { JournalrConfig } from "../config";
-import { createNote, openNote } from "./utils";
+import { createNote, openNote } from "../utils";
 
 export async function createJournal(config: JournalrConfig) {
   if (!config.journalFormats) {

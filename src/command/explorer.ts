@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
 import { JournalrConfig } from "../config";
-import { createNote, openNote, noteTitle } from "./utils";
+import { createNote, openNote, noteTitle } from "../utils";
 
 export async function menuCreateNote(
   fileUri: vscode.Uri,
