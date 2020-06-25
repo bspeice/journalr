@@ -13,12 +13,9 @@ export async function menuCreateNote(
   await createNote(noteUri).then(openNote);
 }
 
-export async function menuCopyId(
-    fileUri: vscode.Uri,
-    config: JournalrConfig,
-) {
-    const relpath = vscode.workspace.asRelativePath(fileUri);
-    const title = await noteTitle(fileUri);
+export async function menuCopyId(fileUri: vscode.Uri, config: JournalrConfig) {
+  const relpath = vscode.workspace.asRelativePath(fileUri);
+  const title = await noteTitle(fileUri);
 
-    vscode.env.clipboard.writeText(`[${title}](/${relpath})`);
+  vscode.env.clipboard.writeText(`[${title}](/${relpath})`);
 }

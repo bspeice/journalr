@@ -4,6 +4,7 @@ import { JournalrConfig } from "./config";
 import { insertAttachment, insertImage } from "./command/attachment";
 import { menuCreateNote, menuCopyId } from "./command/explorer";
 import { createJournal } from "./command/journal";
+import * as topicBrowser from "./command/topic_browser";
 import { TopicBrowserProvider } from "./view/topic";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -13,14 +14,21 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand("journalr.insertAttachment", () => {
-      insertAttachment();
-    })
+    vscode.commands.registerCommand(
+      "journalr.insertAttachment",
+      insertAttachment
+    )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.insertImage", () => {
       insertImage();
     })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.refresh",
+      topicBrowser.refresh
+    )
   );
 
   context.subscriptions.push(
