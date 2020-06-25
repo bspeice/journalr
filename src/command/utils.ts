@@ -12,7 +12,9 @@ export async function openNote(
   return await vscode.window.showTextDocument(doc);
 }
 
-export async function noteTitle(fileUri: vscode.Uri): Promise<string> {
+export async function noteTitle(
+  fileUri: vscode.Uri
+): Promise<string | undefined> {
   const doc = await vscode.workspace.openTextDocument(fileUri);
 
   // If the document contains a `# ` as the first line, treat that as the title.
@@ -21,10 +23,5 @@ export async function noteTitle(fileUri: vscode.Uri): Promise<string> {
   const end = start.with({ line: 0, character: 2 });
   const range = new vscode.Range(start, end);
 
-  if (doc.getText(range) === "# ") {
-    return doc.lineAt(0).text.slice(2);
-  } else {
-    const components = fileUri.path.split("/");
-    return components ? components[components.length - 1] : "";
-  }
+  return doc.getText(range) === "# " ? doc.lineAt(0).text.slice(2) : undefined;
 }

@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export function refresh() {
-    vscode.window.showInformationMessage("Refreshing...");
+  vscode.window.showInformationMessage("Refreshing...");
 }
