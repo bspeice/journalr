@@ -11,6 +11,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onView:journalr.topicBrowser",
     "onCommand:journalr.createJournal",
     "onCommand:journalr.insertAttachment",
     "onCommand:journalr.insertImage",
@@ -87,6 +88,14 @@
           "command": "journalr.explorerContextCopyId",
           "when": "!explorerResourceIsFolder",
           "group": "2_workspace"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "topicBrowser",
+          "name": "Topics"
         }
       ]
     }

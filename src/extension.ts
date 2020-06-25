@@ -4,6 +4,7 @@ import { JournalrConfig } from "./config";
 import { insertAttachment, insertImage } from "./command/attachment";
 import { menuCreateNote, menuCopyId } from "./command/explorer";
 import { createJournal } from "./command/journal";
+import { TopicBrowserProvider } from "./view/topic";
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -36,6 +37,13 @@ export function activate(context: vscode.ExtensionContext) {
       (fileUri: vscode.Uri) => {
         menuCopyId(fileUri, JournalrConfig.fromConfig());
       }
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(
+      "journalr.topicBrowser",
+      new TopicBrowserProvider()
     )
   );
 }
