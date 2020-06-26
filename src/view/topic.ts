@@ -59,7 +59,7 @@ export class TopicBrowserProvider
         return db.topics.map((t) => {
           return {
             type: EntryType.Topic,
-            entry: t
+            entry: t,
           };
         });
       });
