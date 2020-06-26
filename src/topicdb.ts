@@ -29,7 +29,7 @@ export interface TopicDb {
 async function buildTopic(
   name: string,
   root: vscode.Uri,
-  isRoot: boolean
+  isRootTopic: boolean
 ): Promise<Topic> {
   var entries = [];
   for await (const [itemName, ft] of await vscode.workspace.fs.readDirectory(
@@ -58,7 +58,7 @@ async function buildTopic(
     title: name,
     uri: root,
     entries: entries,
-    isRoot: isRoot,
+    isRoot: isRootTopic,
   };
 }
 
