@@ -1,10 +1,15 @@
 import * as vscode from "vscode";
 
+export enum EntryType {
+  Topic = 1,
+  Article,
+}
+
 export interface Topic {
   title: string;
   uri: vscode.Uri;
-  subtopics: Topic[];
-  articles: Article[];
+  isRoot: boolean;
+  entries: TopicEntry[];
 }
 
 export interface Article {
@@ -12,27 +17,60 @@ export interface Article {
   uri: vscode.Uri;
 }
 
+export interface TopicEntry {
+  type: EntryType;
+  entry: Topic | Article;
+}
+
 export interface TopicDb {
-  topics: Topic[];
+  topics: TopicEntry[];
 }
 
-async function fromRoots(roots: vscode.Uri[]): Promise<TopicDb> {
-  return { topics: [] };
-}
-
-var _currentDb: Promise<TopicDb> | undefined = undefined;
-
-export function currentDb(): Promise<TopicDb> {
-  // I have no idea if this is actually CAS; I'd rather not have two DBs getting simultaneously
-  // constructed, but I can't find much information on implementing an actual lock.
-  if (!_currentDb) {
-    const wsFolders =
-      vscode.workspace.workspaceFolders?.map((f) => f.uri) ?? [];
-    _currentDb = fromRoots(wsFolders);
+async function buildTopic(
+  name: string,
+  root: vscode.Uri,
+  isRoot: boolean
+): Promise<Topic> {
+  var entries = [];
+  for await (const [itemName, ft] of await vscode.workspace.fs.readDirectory(
+    root
+  )) {
+    const itemUri = vscode.Uri.joinPath(root, itemName);
+    if (ft === vscode.FileType.Directory) {
+      const topic = await buildTopic(itemName, itemUri, false);
+      entries.push({
+        type: EntryType.Topic,
+        entry: topic,
+      });
+    } else if (ft === vscode.FileType.File) {
+      const article = {
+        title: itemName,
+        uri: itemUri,
+      };
+      entries.push({
+        type: EntryType.Article,
+        entry: article,
+      });
+    }
   }
-  return _currentDb;
+
+  return {
+    title: name,
+    uri: root,
+    entries: entries,
+    isRoot: isRoot,
+  };
 }
 
-export function invalidateDb() {
-  _currentDb = undefined;
+export async function workspaceDb(): Promise<TopicDb> {
+  var topics = [];
+
+  for (const wsFolder of vscode.workspace.workspaceFolders ?? []) {
+    const rootTopic = await buildTopic(wsFolder.name, wsFolder.uri, true);
+    topics.push({
+      type: EntryType.Topic,
+      entry: rootTopic,
+    });
+  }
+  return { topics: topics };
 }

@@ -1,28 +1,68 @@
 import * as vscode from "vscode";
-import { TopicDb, Topic } from "../topicdb";
+import { TopicDb, TopicEntry, EntryType, Topic, Article } from "../topicdb";
 
-export class TopicBrowserProvider implements vscode.TreeDataProvider<Topic> {
+function articleToTreeItem(article: Article): vscode.TreeItem {
+  return {
+    label: article.title,
+    resourceUri: article.uri,
+    collapsibleState: vscode.TreeItemCollapsibleState.None,
+  };
+}
+
+function topicToTreeItem(topic: Topic): vscode.TreeItem {
+  const collapsibleState = topic.isRoot
+    ? vscode.TreeItemCollapsibleState.Expanded
+    : vscode.TreeItemCollapsibleState.Collapsed;
+  return {
+    label: topic.title,
+    resourceUri: topic.uri,
+    collapsibleState: collapsibleState,
+  };
+}
+
+export class TopicBrowserProvider
+  implements vscode.TreeDataProvider<TopicEntry> {
   private _onDidChangeTreeData: vscode.EventEmitter<
-    Topic | undefined
-  > = new vscode.EventEmitter<Topic | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<Topic | undefined> = this
+    TopicEntry | undefined
+  > = new vscode.EventEmitter<TopicEntry | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<TopicEntry | undefined> = this
     ._onDidChangeTreeData.event;
 
-  dbRetriever: () => Promise<TopicDb>;
+  constructor(public topicDb: Thenable<TopicDb>) {}
 
-  constructor(dbRetriever: () => Promise<TopicDb>) {
-    this.dbRetriever = dbRetriever;
-  }
-
-  refresh(): void {
+  refresh(topicDb: Thenable<TopicDb>): void {
+    this.topicDb = topicDb;
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  getTreeItem(element: Topic): vscode.TreeItem | Thenable<vscode.TreeItem> {
-    throw new Error("Method not implemented.");
+  getTreeItem(
+    element: TopicEntry
+  ): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    switch (element.type) {
+      case EntryType.Article:
+        return articleToTreeItem(element.entry as Article);
+
+      case EntryType.Topic:
+        return topicToTreeItem(element.entry as Topic);
+
+      default:
+        throw new Error("Unrecognized topic type");
+    }
   }
 
-  getChildren(element?: Topic | undefined): vscode.ProviderResult<Topic[]> {
+  getChildren(
+    element?: TopicEntry | undefined
+  ): vscode.ProviderResult<TopicEntry[]> {
+    if (element === undefined) {
+      return this.topicDb.then((db) => db.topics);
+    }
+
+    if (element.type === EntryType.Topic) {
+      const topic = element.entry as Topic;
+      return topic.entries;
+    }
+
+    // Articles don't have children
     return [];
   }
 }

@@ -5,7 +5,7 @@ import { insertAttachment, insertImage } from "./command/attachment";
 import { menuCreateNote, menuCopyId } from "./command/explorer";
 import { createJournal } from "./command/journal";
 import { TopicBrowserProvider } from "./view/topic";
-import { currentDb } from "./topicdb";
+import { workspaceDb } from "./topicdb";
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  const topicProvider = new TopicBrowserProvider(currentDb);
+  const topicProvider = new TopicBrowserProvider(workspaceDb());
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
       "journalr.topicBrowser",
@@ -50,13 +50,10 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  // NOTE: registering `topicProvider.refresh` as a closure causes issues because `this`
-  // becomes undefined. WTF?
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "journalr.topicBrowser.refresh",
-      () => { topicProvider.refresh(); }
-    )
+    vscode.commands.registerCommand("journalr.topicBrowser.refresh", () => {
+      topicProvider.refresh(workspaceDb());
+    })
   );
 }
 
