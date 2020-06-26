@@ -42,7 +42,9 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  const topicProvider = new TopicBrowserProvider(workspaceDb());
+  const topicProvider = new TopicBrowserProvider(
+    Promise.resolve(workspaceDb())
+  );
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
       "journalr.topicBrowser",
@@ -52,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.topicBrowser.refresh", () => {
-      topicProvider.refresh(workspaceDb());
+      topicProvider.refresh(Promise.resolve(workspaceDb()));
     })
   );
 }
