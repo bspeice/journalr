@@ -7,6 +7,7 @@ import * as journal from "./command/journal";
 import { TopicBrowserProvider } from "./view/topic";
 import { workspaceDb, TopicEntry } from "./topicdb";
 import * as topicBrowser from "./command/topic_browser";
+import moment = require("moment");
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -51,6 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
       topicProvider
     )
   );
+  // TODO: Workspace file watcher to trigger refresh
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.topicBrowser.refresh", () => {
       topicProvider.refresh(workspaceDb());
@@ -68,7 +70,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createNote",
       (node: TopicEntry) => {
-        topicBrowser.createNote(node);
+        topicBrowser
+          .createNote(node, moment(), JournalrConfig.fromConfig())
+          .then((doRefresh) => {
+            doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
+          });
       }
     )
   );
@@ -76,7 +82,9 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createTopic",
       (node: TopicEntry) => {
-        topicBrowser.createTopic(node);
+        topicBrowser.createTopic(node).then((doRefresh) => {
+          doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
+        });
       }
     )
   );
