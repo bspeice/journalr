@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { TopicDb, TopicEntry, EntryType, Topic, Article } from "../topicdb";
 
+// TODO: Clicking on an article should open it in an editor
+
 function articleToTreeItem(article: Article): vscode.TreeItem {
   return {
     label: article.title,
