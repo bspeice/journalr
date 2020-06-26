@@ -57,15 +57,18 @@ export class TopicBrowserProvider
     element?: TopicEntry | undefined
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
-      // TODO: Unpack the root if the topics list is only one element
       console.log(`Getting children of root`);
+      if (this.topicDb.topics.length === 1) {
+        return this.topicDb.topics[0].getEntries();
+      }
+
       return this.topicDb.topics;
     }
 
     if (element.type === EntryType.Topic) {
       const e = element as Topic;
       console.log(`Getting children of ${e.title}`);
-      return (element as Topic).entries;
+      return e.getEntries();
     }
 
     // Articles don't have children
