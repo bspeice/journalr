@@ -9,6 +9,8 @@ import { workspaceDb, TopicEntry } from "./topicdb";
 import * as topicBrowser from "./command/topic_browser";
 import moment = require("moment");
 
+// TODO: Separate commands from user input; testing shouldn't rely on manipulating the UI.
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.journal.createJournal", () => {

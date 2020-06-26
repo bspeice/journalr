@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { TopicDb, TopicEntry, EntryType, Topic, Article } from "../topicdb";
 
-// TODO: Move notes and preserve all links
+// TODO: Move notes and preserve all links: https://github.com/Microsoft/vscode/issues/32592
 // TODO: Clicking on an article should open it in an editor
 
 function articleToTreeItem(article: Article): vscode.TreeItem {
