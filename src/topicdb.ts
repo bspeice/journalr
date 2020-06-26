@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
-import { dir } from "console";
 
 export enum EntryType {
   Topic = 1,
