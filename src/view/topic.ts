@@ -7,7 +7,7 @@ function articleToTreeItem(article: Article): vscode.TreeItem {
     resourceUri: article.uri,
     collapsibleState: vscode.TreeItemCollapsibleState.None,
     description: true,
-    contextValue: "topicBrowser.article",
+    contextValue: "journalr.article",
   };
 }
 
@@ -19,7 +19,7 @@ function topicToTreeItem(topic: Topic): vscode.TreeItem {
     label: topic.title,
     resourceUri: topic.uri,
     collapsibleState: collapsibleState,
-    contextValue: "topicBrowser.topic",
+    contextValue: "journalr.topic",
   };
 }
 

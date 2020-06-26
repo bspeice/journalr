@@ -12,12 +12,15 @@
   ],
   "activationEvents": [
     "onView:journalr.topicBrowser",
-    "onCommand:journalr.createJournal",
-    "onCommand:journalr.insertAttachment",
-    "onCommand:journalr.insertImage",
+    "onCommand:journalr.journal.createJournal",
+    "onCommand:journalr.attachment.insertAttachment",
+    "onCommand:journalr.attachment.insertImage",
     "onCommand:journalr.explorerContextCreateNote",
     "onCommand:journalr.explorerContextCopyId",
-    "onCommand:journalr.topicBrowser.refresh"
+    "onCommand:journalr.topicBrowser.refresh",
+    "onCommand:journalr.topicBrowser.copyId",
+    "onCommand:journalr.topicBrowser.createNote",
+    "onCommand:journalr.topicBrowser.createTopic"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -43,17 +46,17 @@
     },
     "commands": [
       {
-        "command": "journalr.createJournal",
+        "command": "journalr.journal.createJournal",
         "title": "Create Journal",
         "category": "Journalr"
       },
       {
-        "command": "journalr.insertAttachment",
+        "command": "journalr.attachment.insertAttachment",
         "title": "Insert Attachment",
         "category": "Journalr"
       },
       {
-        "command": "journalr.insertImage",
+        "command": "journalr.attachment.insertImage",
         "title": "Insert Image",
         "category": "Journalr"
       },
@@ -72,6 +75,24 @@
         "title": "Refresh Topics",
         "category": "Journalr",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "journalr.topicBrowser.copyId",
+        "title": "Copy Note ID",
+        "category": "Journalr",
+        "icon": "$(files)"
+      },
+      {
+        "command": "journalr.topicBrowser.createNote",
+        "title": "Create Note",
+        "category": "Journalr",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "journalr.topicBrowser.createTopic",
+        "title": "Create Topic",
+        "category": "Journalr",
+        "icon": "$(file-directory-create)"
       }
     ],
     "menus": {
@@ -82,6 +103,18 @@
         },
         {
           "command": "journalr.explorer.copyId",
+          "when": "false"
+        },
+        {
+          "command": "journalr.topicBrowser.copyId",
+          "when": "false"
+        },
+        {
+          "command": "journalr.topicBrowser.createNote",
+          "when": "false"
+        },
+        {
+          "command": "journalr.topicBrowser.createTopic",
           "when": "false"
         }
       ],
@@ -103,6 +136,37 @@
           "when": "view == journalr.topicBrowser",
           "group": "navigation"
         }
+      ],
+      "view/item/context": [
+        {
+          "command": "journalr.topicBrowser.copyId",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.article",
+          "group": "inline"
+        },
+        {
+          "command": "journalr.topicBrowser.copyId",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.article"
+        },
+        {
+          "command": "journalr.topicBrowser.createNote",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.topic",
+          "group": "inline"
+        },
+        {
+          "command": "journalr.topicBrowser.createNote",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.topic",
+          "group": "inline"
+        },
+        {
+          "command": "journalr.topicBrowser.createTopic",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.topic",
+          "group": "inline"
+        },
+        {
+          "command": "journalr.topicBrowser.createTopic",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.topic",
+          "group": "inline"
+        }
       ]
     },
     "views": {
@@ -121,7 +185,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/ package.json tsconfig.json"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

@@ -1,21 +1,21 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
 import { JournalrConfig } from "../config";
-import { createNote, openNote, noteTitle } from "../utils";
+import * as utils from "../utils";
 
-export async function menuCreateNote(
+export async function createNote(
   fileUri: vscode.Uri,
   config: JournalrConfig
 ) {
   const formatted = moment().format(config.contextMenuFormat);
   const noteUri = vscode.Uri.joinPath(fileUri, formatted);
 
-  await createNote(noteUri).then(openNote);
+  await utils.createNote(noteUri).then(utils.openNote);
 }
 
-export async function menuCopyId(fileUri: vscode.Uri, config: JournalrConfig) {
+export async function copyId(fileUri: vscode.Uri, _config: JournalrConfig) {
   const relpath = vscode.workspace.asRelativePath(fileUri);
-  const title = await noteTitle(fileUri);
+  const title = await utils.noteTitle(fileUri);
 
   vscode.env.clipboard.writeText(`[${title}](/${relpath})`);
 }

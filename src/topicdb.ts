@@ -31,7 +31,7 @@ async function buildTopic(
   root: vscode.Uri,
   isRootTopic: boolean
 ): Promise<Topic> {
-  var entries: Thenable<TopicEntry>[] = [];
+  var entries = [];
   const dirEntries = await vscode.workspace.fs.readDirectory(root);
   for (const [itemName, ft] of dirEntries) {
     const itemUri = vscode.Uri.joinPath(root, itemName);
