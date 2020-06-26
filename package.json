@@ -12,7 +12,6 @@
   ],
   "activationEvents": [
     "onView:journalr.topicBrowser",
-    "onView:journalr.exampleTree",
     "onCommand:journalr.journal.createJournal",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",
@@ -173,10 +172,6 @@
         {
           "id": "journalr.topicBrowser",
           "name": "Topics"
-        },
-        {
-          "id": "journalr.exampleTree",
-          "name": "Render Example"
         }
       ]
     }

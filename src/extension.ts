@@ -7,7 +7,6 @@ import * as journal from "./command/journal";
 import { TopicBrowserProvider } from "./view/topic";
 import { workspaceDb, TopicEntry } from "./topicdb";
 import * as topicBrowser from "./command/topic_browser";
-import { exampleTree } from "./exampleTree";
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -79,14 +78,6 @@ export function activate(context: vscode.ExtensionContext) {
       (node: TopicEntry) => {
         topicBrowser.createTopic(node);
       }
-    )
-  );
-
-  const t = exampleTree();
-  context.subscriptions.push(
-    vscode.window.registerTreeDataProvider(
-      "journalr.exampleTree",
-      t
     )
   );
 }
