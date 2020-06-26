@@ -3,10 +3,7 @@ import * as moment from "moment";
 import { JournalrConfig } from "../config";
 import * as utils from "../utils";
 
-export async function createNote(
-  fileUri: vscode.Uri,
-  config: JournalrConfig
-) {
+export async function createNote(fileUri: vscode.Uri, config: JournalrConfig) {
   const formatted = moment().format(config.contextMenuFormat);
   const noteUri = vscode.Uri.joinPath(fileUri, formatted);
 

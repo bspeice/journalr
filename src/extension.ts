@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.explorer.copyId",
       (fileUri: vscode.Uri) => {
-      explorer.copyId(fileUri, JournalrConfig.fromConfig());
+        explorer.copyId(fileUri, JournalrConfig.fromConfig());
       }
     )
   );

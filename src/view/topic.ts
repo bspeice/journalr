@@ -43,10 +43,10 @@ export class TopicBrowserProvider
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
     switch (element.type) {
       case EntryType.Article:
-        return articleToTreeItem(element.entry as Article);
+        return articleToTreeItem(element as Article);
 
       case EntryType.Topic:
-        return topicToTreeItem(element.entry as Topic);
+        return topicToTreeItem(element as Topic);
 
       default:
         throw new Error("Unrecognized topic type");
@@ -58,11 +58,14 @@ export class TopicBrowserProvider
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
       // TODO: Unpack the root if the topics list is only one element
+      console.log(`Getting children of root`);
       return this.topicDb.topics;
     }
 
     if (element.type === EntryType.Topic) {
-      return (element.entry as Topic).entries;
+      const e = element as Topic;
+      console.log(`Getting children of ${e.title}`);
+      return (element as Topic).entries;
     }
 
     // Articles don't have children
