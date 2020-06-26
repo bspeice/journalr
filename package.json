@@ -154,8 +154,7 @@
         },
         {
           "command": "journalr.topicBrowser.createNote",
-          "when": "view == journalr.topicBrowser && viewItem == journalr.topic",
-          "group": "inline"
+          "when": "view == journalr.topicBrowser && viewItem == journalr.topic"
         },
         {
           "command": "journalr.topicBrowser.createTopic",
@@ -164,8 +163,7 @@
         },
         {
           "command": "journalr.topicBrowser.createTopic",
-          "when": "view == journalr.topicBrowser && viewItem == journalr.topic",
-          "group": "inline"
+          "when": "view == journalr.topicBrowser && viewItem == journalr.topic"
         }
       ]
     },
