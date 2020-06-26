@@ -3,8 +3,6 @@ import { TopicEntry, EntryType, Topic, Article, TopicDb } from "../topicdb";
 import { JournalrConfig } from "../config";
 import * as utils from "../utils";
 
-// TODO: Command for creating a root topic?
-
 export async function createTopic(node: TopicEntry): Promise<boolean> {
   if (node.type !== EntryType.Topic) {
     vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
@@ -30,7 +28,6 @@ export async function createNote(
   moment: moment.Moment,
   config: JournalrConfig
 ): Promise<boolean> {
-  // TODO: Make sure the topic browser opens to the newly-created note
   if (node.type !== EntryType.Topic) {
     vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
     return false;
@@ -54,7 +51,6 @@ export async function createNote(
   return true;
 }
 
-// TODO: Copy IDs with and without titles
 
 export function copyId(node: TopicEntry): void {
   if (node.type !== EntryType.Article) {
@@ -62,9 +58,6 @@ export function copyId(node: TopicEntry): void {
   }
 
   const article = node as Article;
-  // TODO: Better way of encoding URI's?
-  // `encodeURI` doesn't handle spaces at all, and `encodeURIComponent` improperly
-  // replaces `/`
   const relPath = vscode.workspace
     .asRelativePath(article.uri)
     .replace(" ", "%20");
