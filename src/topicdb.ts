@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
-import { dir } from "console";
 
 export enum EntryType {
   Topic = 1,
@@ -23,7 +22,31 @@ export class Topic implements TopicEntry {
   }
 
   getEntries(): Thenable<TopicEntry[]> {
-    return Promise.resolve([]);
+    const res = vscode.workspace.fs
+      .readDirectory(this.uri)
+      .then((dirEntries) => {
+        const articlePromises = dirEntries
+          .filter(([_, ft]) => ft === vscode.FileType.File)
+          .map(([name, _]) => name)
+          .map((name) => vscode.Uri.joinPath(this.uri, name))
+          .map((uri) => Article.fromUri(uri));
+
+        const topics = dirEntries
+          .filter(([_, ft]) => ft === vscode.FileType.Directory)
+          .map(([name, _]) => name)
+          .map((name) => {
+            return new Topic(name, vscode.Uri.joinPath(this.uri, name), false);
+          });
+
+        return Promise.all(articlePromises)
+          .then(
+            (articles) =>
+              articles.filter((a) => a !== undefined) as TopicEntry[]
+          )
+          .then((articles) => articles.concat(topics));
+      });
+
+    return res;
   }
 }
 
@@ -32,6 +55,16 @@ export class Article implements TopicEntry {
 
   constructor(public title: string, public uri: vscode.Uri) {
     this.type = EntryType.Article;
+  }
+
+  static fromUri(uri: vscode.Uri): Thenable<Article | undefined> {
+    return utils.noteTitle(uri).then((name) => {
+      if (name === undefined) {
+        return undefined;
+      }
+
+      return new Article(name, uri);
+    });
   }
 }
 
