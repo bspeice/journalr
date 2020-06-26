@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import { dir } from "console";
 
 export enum EntryType {
   Topic = 1,
@@ -24,6 +25,7 @@ export class Topic implements TopicEntry {
   getEntries(): Thenable<TopicEntry[]> {
     const res = vscode.workspace.fs
       .readDirectory(this.uri)
+      .then((dirEntries) => dirEntries.reverse())
       .then((dirEntries) => {
         const articlePromises = dirEntries
           .filter(([_, ft]) => ft === vscode.FileType.File)
