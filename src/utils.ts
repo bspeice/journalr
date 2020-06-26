@@ -15,7 +15,13 @@ export async function openNote(
 export async function noteTitle(
   fileUri: vscode.Uri
 ): Promise<string | undefined> {
-  const doc = await vscode.workspace.openTextDocument(fileUri);
+  var doc;
+  try {
+    doc = await vscode.workspace.openTextDocument(fileUri);
+  } catch (e) {}
+  if (doc === undefined) {
+    return undefined;
+  }
 
   // If the document contains a `# ` as the first line, treat that as the title.
   // Otherwise, just use the `basename`

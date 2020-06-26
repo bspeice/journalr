@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as utils from './utils';
 
 export enum EntryType {
   Topic = 1,
@@ -31,6 +32,8 @@ async function buildTopic(
   root: vscode.Uri,
   isRootTopic: boolean
 ): Promise<Topic> {
+  console.log(`Building topic ${root}`);
+
   var entries = [];
   const dirEntries = await vscode.workspace.fs.readDirectory(root);
   for (const [itemName, ft] of dirEntries) {
@@ -45,8 +48,13 @@ async function buildTopic(
       });
       entries.push(entry);
     } else if (ft === vscode.FileType.File) {
+      const title = await utils.noteTitle(itemUri);
+      if (title === undefined) {
+        continue;
+      }
+
       const article = {
-        title: itemName,
+        title: title,
         uri: itemUri,
       };
       const entry = {
