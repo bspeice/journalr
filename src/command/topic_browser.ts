@@ -30,6 +30,7 @@ export async function createNote(
   moment: moment.Moment,
   config: JournalrConfig
 ): Promise<boolean> {
+  // TODO: Make sure the topic browser opens to the newly-created note
   if (node.type !== EntryType.Topic) {
     vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
     return false;
