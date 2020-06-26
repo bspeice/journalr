@@ -6,6 +6,8 @@ function articleToTreeItem(article: Article): vscode.TreeItem {
     label: article.title,
     resourceUri: article.uri,
     collapsibleState: vscode.TreeItemCollapsibleState.None,
+    description: true,
+    contextValue: "topicBrowser.article"
   };
 }
 
@@ -17,6 +19,7 @@ function topicToTreeItem(topic: Topic): vscode.TreeItem {
     label: topic.title,
     resourceUri: topic.uri,
     collapsibleState: collapsibleState,
+    contextValue: "topicBrowser.topic"
   };
 }
 
@@ -54,14 +57,23 @@ export class TopicBrowserProvider
     element?: TopicEntry | undefined
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
-      // TODO: This junk needs to get cleaned up.
       return this.topicDb.then((db) => {
-        return db.topics.map((t) => {
-          return {
-            type: EntryType.Topic,
-            entry: t,
-          };
-        });
+        if (db.topics.length === 0) {
+          return [];
+        } else if (db.topics.length === 1) {
+          // If there's only one root topic, go ahead and unpack that.
+          const rootTopic = db.topics[0];
+          return rootTopic.then((t) => {
+            return t.entries;
+          });
+        } else {
+          return db.topics.map((t) => {
+            return {
+              type: EntryType.Topic,
+              entry: t
+            };
+          });
+        }
       });
     }
 
