@@ -53,4 +53,16 @@ export async function createNote(
   return true;
 }
 
-export function copyId(_node: TopicEntry): void {}
+export function copyId(node: TopicEntry): void {
+    if (node.type !== EntryType.Article) {
+        vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
+    }
+
+    const article = node as Article;
+    // TODO: Better way of encoding URI's?
+    // `encodeURI` doesn't handle spaces at all, and `encodeURIComponent` improperly
+    // replaces `/`
+    const relPath = vscode.workspace.asRelativePath(article.uri).replace(" ", "%20");
+
+    vscode.env.clipboard.writeText(`[${article.title}](/${relPath})`);
+}
