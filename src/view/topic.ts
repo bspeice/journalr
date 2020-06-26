@@ -57,19 +57,8 @@ export class TopicBrowserProvider
     element?: TopicEntry | undefined
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
-      // TODO: Clean up this junk
-      return this.topicDb.topics.then((topics) => {
-        if (topics.length === 1) {
-          return topics[0].entries;
-        }
-
-        return topics.map((t) => {
-          return {
-            type: EntryType.Topic,
-            entry: t,
-          };
-        });
-      });
+      // TODO: Unpack the root if the topics list is only one element
+      return this.topicDb.topics;
     }
 
     if (element.type === EntryType.Topic) {

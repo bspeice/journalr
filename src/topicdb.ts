@@ -24,7 +24,7 @@ export interface TopicEntry {
 }
 
 export interface TopicDb {
-  topics: Thenable<Topic[]>;
+  topics: Thenable<TopicEntry[]>;
 }
 
 async function buildTopic(
@@ -75,7 +75,20 @@ async function buildTopic(
 
 export function workspaceDb(): TopicDb {
   const wsFolders = vscode.workspace.workspaceFolders ?? [];
+  const rootTopics = wsFolders.map((f) => buildTopic(f.name, f.uri, true));
+  const allEntries = Promise.all(rootTopics).then((topics) => {
+    var entries = [];
+    for (const topic of topics) {
+      entries.push({
+        type: EntryType.Topic,
+        entry: topic
+      });
+    }
+
+    return entries;
+  });
+
   return {
-    topics: Promise.all(wsFolders.map((f) => buildTopic(f.name, f.uri, true))),
+    topics: allEntries
   };
 }
