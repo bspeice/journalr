@@ -7,14 +7,18 @@ export enum EntryType {
   Article,
 }
 
-export interface TopicEntry { 
-  type: EntryType
-};
+export interface TopicEntry {
+  type: EntryType;
+}
 
 export class Topic implements TopicEntry {
   public type: EntryType;
 
-  constructor(public title: string, public uri: vscode.Uri, public isRoot: boolean) {
+  constructor(
+    public title: string,
+    public uri: vscode.Uri,
+    public isRoot: boolean
+  ) {
     this.type = EntryType.Topic;
   }
 
