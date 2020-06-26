@@ -9,7 +9,7 @@ export interface Topic {
   title: string;
   uri: vscode.Uri;
   isRoot: boolean;
-  entries: TopicEntry[];
+  entries: Thenable<TopicEntry[]>;
 }
 
 export interface Article {
@@ -19,11 +19,11 @@ export interface Article {
 
 export interface TopicEntry {
   type: EntryType;
-  entry: Thenable<Topic | Article>;
+  entry: Topic | Article;
 }
 
 export interface TopicDb {
-  topics: Thenable<Topic>[];
+  topics: Thenable<Topic[]>;
 }
 
 async function buildTopic(
@@ -31,25 +31,29 @@ async function buildTopic(
   root: vscode.Uri,
   isRootTopic: boolean
 ): Promise<Topic> {
-  var entries: TopicEntry[] = [];
+  var entries: Thenable<TopicEntry>[] = [];
   const dirEntries = await vscode.workspace.fs.readDirectory(root);
   for (const [itemName, ft] of dirEntries) {
     const itemUri = vscode.Uri.joinPath(root, itemName);
     if (ft === vscode.FileType.Directory) {
       const topic = buildTopic(itemName, itemUri, false);
-      entries.push({
-        type: EntryType.Topic,
-        entry: topic,
+      const entry = topic.then((t) => {
+        return {
+          type: EntryType.Topic,
+          entry: t,
+        };
       });
+      entries.push(entry);
     } else if (ft === vscode.FileType.File) {
       const article = {
         title: itemName,
         uri: itemUri,
       };
-      entries.push({
+      const entry = {
         type: EntryType.Article,
-        entry: Promise.resolve(article),
-      });
+        entry: article,
+      };
+      entries.push(Promise.resolve(entry));
     }
   }
 
@@ -57,13 +61,13 @@ async function buildTopic(
     title: name,
     uri: root,
     isRoot: isRootTopic,
-    entries: entries,
+    entries: Promise.all(entries),
   };
 }
 
 export function workspaceDb(): TopicDb {
   const wsFolders = vscode.workspace.workspaceFolders ?? [];
   return {
-    topics: wsFolders.map((f) => buildTopic(f.name, f.uri, true)),
+    topics: Promise.all(wsFolders.map((f) => buildTopic(f.name, f.uri, true))),
   };
 }

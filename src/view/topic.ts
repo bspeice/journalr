@@ -7,7 +7,7 @@ function articleToTreeItem(article: Article): vscode.TreeItem {
     resourceUri: article.uri,
     collapsibleState: vscode.TreeItemCollapsibleState.None,
     description: true,
-    contextValue: "topicBrowser.article"
+    contextValue: "topicBrowser.article",
   };
 }
 
@@ -19,7 +19,7 @@ function topicToTreeItem(topic: Topic): vscode.TreeItem {
     label: topic.title,
     resourceUri: topic.uri,
     collapsibleState: collapsibleState,
-    contextValue: "topicBrowser.topic"
+    contextValue: "topicBrowser.topic",
   };
 }
 
@@ -31,9 +31,9 @@ export class TopicBrowserProvider
   readonly onDidChangeTreeData: vscode.Event<TopicEntry | undefined> = this
     ._onDidChangeTreeData.event;
 
-  constructor(public topicDb: Thenable<TopicDb>) {}
+  constructor(public topicDb: TopicDb) {}
 
-  refresh(topicDb: Thenable<TopicDb>): void {
+  refresh(topicDb: TopicDb): void {
     this.topicDb = topicDb;
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -43,10 +43,10 @@ export class TopicBrowserProvider
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
     switch (element.type) {
       case EntryType.Article:
-        return element.entry.then((e) => articleToTreeItem(e as Article));
+        return articleToTreeItem(element.entry as Article);
 
       case EntryType.Topic:
-        return element.entry.then((e) => topicToTreeItem(e as Topic));
+        return topicToTreeItem(element.entry as Topic);
 
       default:
         throw new Error("Unrecognized topic type");
@@ -57,28 +57,23 @@ export class TopicBrowserProvider
     element?: TopicEntry | undefined
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
-      return this.topicDb.then((db) => {
-        if (db.topics.length === 0) {
-          return [];
-        } else if (db.topics.length === 1) {
-          // If there's only one root topic, go ahead and unpack that.
-          const rootTopic = db.topics[0];
-          return rootTopic.then((t) => {
-            return t.entries;
-          });
-        } else {
-          return db.topics.map((t) => {
-            return {
-              type: EntryType.Topic,
-              entry: t
-            };
-          });
+      // TODO: Clean up this junk
+      return this.topicDb.topics.then((topics) => {
+        if (topics.length === 1) {
+          return topics[0].entries;
         }
+
+        return topics.map((t) => {
+          return {
+            type: EntryType.Topic,
+            entry: t,
+          };
+        });
       });
     }
 
     if (element.type === EntryType.Topic) {
-      return element.entry.then((t) => (t as Topic).entries);
+      return (element.entry as Topic).entries;
     }
 
     // Articles don't have children
