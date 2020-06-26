@@ -53,6 +53,8 @@ export async function createNote(
   return true;
 }
 
+// TODO: Copy IDs with and without titles
+
 export function copyId(node: TopicEntry): void {
   if (node.type !== EntryType.Article) {
     vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
