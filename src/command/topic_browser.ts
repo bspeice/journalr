@@ -23,6 +23,26 @@ export async function createTopic(node: TopicEntry): Promise<boolean> {
   return true;
 }
 
+export async function createRootTopic(): Promise<boolean> {
+  const wsFolders = vscode.workspace.workspaceFolders ?? [];
+  if (wsFolders.length !== 1) {
+    vscode.window.showWarningMessage(`Unexpected wsFolder length=${wsFolders.length}`);
+    return false;
+  }
+  const wsRoot = wsFolders[0].uri;
+
+  const topicName = await vscode.window.showInputBox({
+    placeHolder: "Topic Name"
+  });
+  if (topicName === undefined) {
+    return false;
+  }
+
+  const newUri = vscode.Uri.joinPath(wsRoot, topicName);
+  await vscode.workspace.fs.createDirectory(newUri);
+  return true;
+}
+
 export async function createNote(
   node: TopicEntry,
   moment: moment.Moment,

@@ -21,7 +21,8 @@
     "onCommand:journalr.topicBrowser.copyId",
     "onCommand:journalr.topicBrowser.copyIdWithTitle",
     "onCommand:journalr.topicBrowser.createNote",
-    "onCommand:journalr.topicBrowser.createTopic"
+    "onCommand:journalr.topicBrowser.createTopic",
+    "onCommand:journalr.topicBroswer.createRootTopic"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -101,6 +102,12 @@
         "icon": "$(file-directory-create)"
       },
       {
+        "command": "journalr.topicBrowser.createRootTopic",
+        "title": "Create Topic",
+        "category": "Journalr",
+        "icon": "$(file-directory-create)"
+      },
+      {
         "command": "journalr.topicBrowser.showArticle",
         "title": "Show Article",
         "category": "Journalr"
@@ -129,6 +136,10 @@
           "when": "false"
         },
         {
+          "command": "journalr.topicBrowser.createRootTopic",
+          "when": "workspaceFolderCount == 1"
+        },
+        {
           "command": "journalr.topicBrowser.createTopic",
           "when": "false"
         },
@@ -153,6 +164,11 @@
         {
           "command": "journalr.topicBrowser.refresh",
           "when": "view == journalr.topicBrowser",
+          "group": "navigation"
+        },
+        {
+          "command": "journalr.topicBrowser.createRootTopic",
+          "when": "view == journalr.topicBrowser && workspaceFolderCount == 1",
           "group": "navigation"
         }
       ],

@@ -87,6 +87,16 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
+      "journalr.topicBrowser.createRootTopic",
+      () => {
+        topicBrowser.createRootTopic().then((doRefresh) => {
+          doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
+        });
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
       "journalr.topicBrowser.createTopic",
       (node: TopicEntry) => {
         topicBrowser.createTopic(node).then((doRefresh) => {
