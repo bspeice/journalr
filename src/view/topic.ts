@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { TopicDb, TopicEntry, EntryType, Topic, Article } from "../topicdb";
 
 async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
-
   return {
     label: article.title,
     resourceUri: article.uri,
@@ -12,8 +11,8 @@ async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
     command: {
       title: "Show Article",
       command: "journalr.topicBrowser.showArticle",
-      arguments: [article]
-    }
+      arguments: [article],
+    },
   };
 }
 
