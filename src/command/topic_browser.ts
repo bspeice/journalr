@@ -51,8 +51,20 @@ export async function createNote(
   return true;
 }
 
-
 export function copyId(node: TopicEntry): void {
+  if (node.type !== EntryType.Article) {
+    vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
+  }
+
+  const article = node as Article;
+  const relPath = vscode.workspace
+    .asRelativePath(article.uri)
+    .replace(" ", "%20");
+
+  vscode.env.clipboard.writeText(`/${relPath}`);
+}
+
+export function copyIdWithTitle(node: TopicEntry): void {
   if (node.type !== EntryType.Article) {
     vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
   }

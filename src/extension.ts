@@ -9,7 +9,6 @@ import { workspaceDb, TopicEntry } from "./topicdb";
 import * as topicBrowser from "./command/topic_browser";
 import moment = require("moment");
 
-
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.journal.createJournal", () => {
@@ -63,6 +62,14 @@ export function activate(context: vscode.ExtensionContext) {
       "journalr.topicBrowser.copyId",
       (node: TopicEntry) => {
         topicBrowser.copyId(node);
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.copyIdWithTitle",
+      (node: TopicEntry) => {
+        topicBrowser.copyIdWithTitle(node);
       }
     )
   );

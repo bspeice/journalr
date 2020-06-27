@@ -19,6 +19,7 @@
     "onCommand:journalr.explorerContextCopyId",
     "onCommand:journalr.topicBrowser.refresh",
     "onCommand:journalr.topicBrowser.copyId",
+    "onCommand:journalr.topicBrowser.copyIdWithTitle",
     "onCommand:journalr.topicBrowser.createNote",
     "onCommand:journalr.topicBrowser.createTopic"
   ],
@@ -83,6 +84,11 @@
         "icon": "$(files)"
       },
       {
+        "command": "journalr.topicBrowser.copyIdWithTitle",
+        "title": "Copy Note ID (with title)",
+        "category": "Journalr"
+      },
+      {
         "command": "journalr.topicBrowser.createNote",
         "title": "Create Note",
         "category": "Journalr",
@@ -107,6 +113,10 @@
         },
         {
           "command": "journalr.topicBrowser.copyId",
+          "when": "false"
+        },
+        {
+          "command": "journalr.topicBrowser.copyIdWithTitle",
           "when": "false"
         },
         {
@@ -145,6 +155,10 @@
         },
         {
           "command": "journalr.topicBrowser.copyId",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.article"
+        },
+        {
+          "command": "journalr.topicBrowser.copyIdWithTitle",
           "when": "view == journalr.topicBrowser && viewItem == journalr.article"
         },
         {

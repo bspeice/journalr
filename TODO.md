@@ -6,8 +6,8 @@
 
 ## Topic Browser
 - After creating a new note, open it in a new editor
-- Add a command to copy note IDs without titles
 - Add a command for creating a root topic
 - URI encoding? Handling spaces is weird. `encodeURI` doesn't handle spaces at all, and `encodeURIComponent` improperly replaces `/`
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as "drag and drop",
   but it appears that VS Code [doesn't currently support this](https://github.com/Microsoft/vscode/issues/32592)
+- Exclude folders and files based on glob expressions - want to make sure that `.git` isn't scanned for example.
