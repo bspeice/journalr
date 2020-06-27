@@ -99,6 +99,11 @@
         "title": "Create Topic",
         "category": "Journalr",
         "icon": "$(file-directory-create)"
+      },
+      {
+        "command": "journalr.topicBrowser.showArticle",
+        "title": "Show Article",
+        "category": "Journalr"
       }
     ],
     "menus": {
@@ -125,6 +130,10 @@
         },
         {
           "command": "journalr.topicBrowser.createTopic",
+          "when": "false"
+        },
+        {
+          "command": "journalr.topicBroswer.showArticle",
           "when": "false"
         }
       ],

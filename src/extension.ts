@@ -5,7 +5,7 @@ import * as attachment from "./command/attachment";
 import * as explorer from "./command/explorer";
 import * as journal from "./command/journal";
 import { TopicBrowserProvider } from "./view/topic";
-import { workspaceDb, TopicEntry } from "./topicdb";
+import { workspaceDb, TopicEntry, Article } from "./topicdb";
 import * as topicBrowser from "./command/topic_browser";
 import moment = require("moment");
 
@@ -93,6 +93,12 @@ export function activate(context: vscode.ExtensionContext) {
           doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
         });
       }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBroswer.showArticle",
+      (article: Article) => topicBrowser.showArticle(article)
     )
   );
 }

@@ -76,3 +76,7 @@ export function copyIdWithTitle(node: TopicEntry): void {
 
   vscode.env.clipboard.writeText(`[${article.title}](/${relPath})`);
 }
+
+export async function showArticle(article: Article): Promise<void> {
+  await vscode.workspace.openTextDocument(article.uri);
+}
