@@ -133,7 +133,7 @@
           "when": "false"
         },
         {
-          "command": "journalr.topicBroswer.showArticle",
+          "command": "journalr.topicBrowser.showArticle",
           "when": "false"
         }
       ],
