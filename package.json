@@ -28,7 +28,7 @@
     "onCommand:journalr.topicBrowser.createRootTopic",
     "onCommand:journalr.topicBrowser.showArticle"
   ],
-  "main": "./dist/extension",
+  "main": "./out/extension.js",
   "contributes": {
     "configuration": {
       "title": "Journalr",
