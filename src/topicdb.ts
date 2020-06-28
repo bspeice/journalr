@@ -43,11 +43,11 @@ export class Topic implements TopicEntry {
       .readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
-      .then((dirEntries) => dirEntries.reverse())
       .then((dirEntries) => {
         const articlePromises = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(uri));
+          .map(([, uri]) => Article.fromUri(uri))
+          .reverse();
 
         const topics = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.Directory)
