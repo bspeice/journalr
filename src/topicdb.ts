@@ -69,6 +69,30 @@ export class Topic implements TopicEntry {
     this.entries = entries;
     return entries;
   }
+
+  recurseArticles(): Thenable<Article[]> {
+    const entries = this.getEntries();
+
+    const articles = entries.then((entries) =>
+      entries.filter((e) => e.type === EntryType.Article)
+    ) as Thenable<Article[]>;
+    const topics = entries.then((entries) =>
+      entries.filter((e) => e.type === EntryType.Topic)
+    ) as Thenable<Topic[]>;
+
+    const topicArticles = topics
+      .then((topics) => {
+        return Promise.all(topics.map((t) => t.recurseArticles()));
+      })
+      .then((articles) =>
+        articles.reduce((acc, a) => acc.concat(a), [])
+      ) as Thenable<Article[]>;
+
+    return Promise.all([
+      topicArticles,
+      articles,
+    ]).then(([topicArticles, articles]) => topicArticles.concat(articles));
+  }
 }
 
 const _MD_FILETYPES = ["md"];
@@ -96,6 +120,13 @@ export class Article implements TopicEntry {
   }
 }
 
+export class TopicDb {
+  constructor(public topics: Topic[]) {}
+
+  allArticles(): Thenable<Article[]> {
+    return Promise.resolve([]);
+  }
+}
 export interface TopicDb {
   topics: Topic[];
 }
@@ -107,7 +138,5 @@ export function workspaceDb(): TopicDb {
     return new Topic(f.name, f.uri, true, ignore);
   });
 
-  return {
-    topics: topics,
-  };
+  return new TopicDb(topics);
 }
