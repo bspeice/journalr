@@ -39,12 +39,12 @@ export class Topic implements TopicEntry {
   }
 
   getEntries(): Thenable<TopicEntry[]> {
-    const res = vscode.workspace.fs
+    return vscode.workspace.fs
       .readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
-        const articlePromises = dirEntries
+        const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
           .map(([, uri]) => Article.fromUri(uri))
           .reverse();
@@ -53,17 +53,13 @@ export class Topic implements TopicEntry {
           .filter(([, , ft]) => ft === vscode.FileType.Directory)
           .map(([name, uri]) => {
             return new Topic(name, uri, false, this.ignoreGlobs);
-          }) as TopicEntry[];
+          })
+          .map((t) => Promise.resolve(t)) as Thenable<TopicEntry | undefined>[];
 
-        return Promise.all(articlePromises)
-          .then(
-            (articles) =>
-              articles.filter((a) => a !== undefined) as TopicEntry[]
-          )
-          .then((articles) => topics.concat(articles));
-      });
-
-    return res;
+        return Promise.all(topics.concat(articles)).then((entries) =>
+          entries.filter((e) => e !== undefined)
+        );
+      }) as Thenable<TopicEntry[]>;
   }
 }
 
