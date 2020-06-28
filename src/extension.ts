@@ -107,7 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "journalr.topicBroswer.showArticle",
+      "journalr.topicBrowser.showArticle",
       (article: Article) => topicBrowser.showArticle(article)
     )
   );

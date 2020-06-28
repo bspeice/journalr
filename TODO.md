@@ -2,7 +2,7 @@
 
 ## General
 - Separate commands from user input; need to add tests, and testing shouldn't rely on manipulating the UI.
-  As inspiration, the [Foam](https://github.com/foambubble/foam-workspace-manager) workspace manager has no dependency on VS Code
+  As inspiration, the [Foam](https://github.com/foambubble/foam-workspace-manager) workspace manager has no dependency on VS Code.
 - Workspace file watcher to trigger refresh (need to make sure commands that currently trigger a refresh *don't cause a double refresh*))
 - Ctrl-P handler for opening notes by title. Will potentially be a performance issue because it requires scanning the entire DB.
   Properly handling exclusions is going to be crucial here.
@@ -11,6 +11,7 @@
 - Search via metadata/front-matter? It may be easier to just use "Find Everywhere" instead.
 - Alternative note formats?
   - [Margin](https://margin.love/#/)
+- Attachments: import multiple, watch out for naming conflicts
 
 ## Topic Browser
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as "drag and drop",

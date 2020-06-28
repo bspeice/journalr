@@ -25,7 +25,8 @@
     "onCommand:journalr.topicBrowser.copyIdWithTitle",
     "onCommand:journalr.topicBrowser.createNote",
     "onCommand:journalr.topicBrowser.createTopic",
-    "onCommand:journalr.topicBroswer.createRootTopic"
+    "onCommand:journalr.topicBrowser.createRootTopic",
+    "onCommand:journalr.topicBrowser.showArticle"
   ],
   "main": "./out/extension.js",
   "contributes": {
