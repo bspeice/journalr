@@ -62,7 +62,6 @@ export class TopicBrowserProvider
     element?: TopicEntry | undefined
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
-      console.log(`Getting children of root`);
       if (this.topicDb.topics.length === 1) {
         return this.topicDb.topics[0].getEntries();
       }
@@ -72,7 +71,6 @@ export class TopicBrowserProvider
 
     if (element.type === EntryType.Topic) {
       const e = element as Topic;
-      console.log(`Getting children of ${e.title}`);
       return e.getEntries();
     }
 
