@@ -4,6 +4,9 @@
   "description": "",
   "publisher": "bspeice",
   "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/bspeice/journalr"
+  },
   "engines": {
     "vscode": "^1.46.0"
   },
