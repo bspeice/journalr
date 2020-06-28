@@ -81,8 +81,7 @@ export class Article implements TopicEntry {
   }
 
   static fromUri(uri: vscode.Uri): Thenable<Article | undefined> {
-    const basename = uri.path.split("/").reverse()[0];
-    const extension = basename.split(".").reverse()[0];
+    const extension = uri.path.split(".").reverse()[0];
     if (!_MD_FILETYPES.includes(extension)) {
       return Promise.resolve(undefined);
     }
