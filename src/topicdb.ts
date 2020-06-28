@@ -28,6 +28,7 @@ function _joinUri(
 
 export class Topic implements TopicEntry {
   public type: EntryType;
+  private entries: Thenable<TopicEntry[]> | undefined;
 
   constructor(
     public title: string,
@@ -39,7 +40,11 @@ export class Topic implements TopicEntry {
   }
 
   getEntries(): Thenable<TopicEntry[]> {
-    return vscode.workspace.fs
+    if (this.entries !== undefined) {
+      return this.entries;
+    }
+
+    const entries = vscode.workspace.fs
       .readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
@@ -60,6 +65,9 @@ export class Topic implements TopicEntry {
           entries.filter((e) => e !== undefined)
         );
       }) as Thenable<TopicEntry[]>;
+
+    this.entries = entries;
+    return entries;
   }
 }
 

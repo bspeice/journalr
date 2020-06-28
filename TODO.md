@@ -23,3 +23,5 @@
 - Exclude folders and files based on glob expressions - want to make sure that `.git` isn't scanned for example.
   Might be worth looking into an [external lib](https://github.com/isaacs/minimatch) for handling.
 - Include files based on extension; don't attempt to load anything non-markdown. If files lie about the extension, oh well.
+- Remember opened topics on restart
+  - Not sure what the best way to remember state is; readonly config variable?
