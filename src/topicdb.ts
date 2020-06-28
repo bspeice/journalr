@@ -1,8 +1,9 @@
+import * as marked from "marked";
+import * as minimatch from "minimatch";
 import * as vscode from "vscode";
 import * as utils from "./utils";
-import * as minimatch from "minimatch";
 import { JournalrConfig } from "./config";
-import { min } from "moment";
+import { link } from "fs";
 
 export enum EntryType {
   Topic = 1,
@@ -33,10 +34,14 @@ export class Topic implements TopicEntry {
   constructor(
     public title: string,
     public uri: vscode.Uri,
-    public isRoot: boolean,
+    public rootUri: vscode.Uri,
     public ignoreGlobs: string[]
   ) {
     this.type = EntryType.Topic;
+  }
+
+  isRoot(): boolean {
+    return this.uri === this.rootUri;
   }
 
   getEntries(): Thenable<TopicEntry[]> {
@@ -51,13 +56,13 @@ export class Topic implements TopicEntry {
       .then((dirEntries) => {
         const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(uri))
+          .map(([, uri]) => Article.fromUri(uri, this.rootUri))
           .reverse();
 
         const topics = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.Directory)
           .map(([name, uri]) => {
-            return new Topic(name, uri, false, this.ignoreGlobs);
+            return new Topic(name, uri, this.rootUri, this.ignoreGlobs);
           })
           .map((t) => Promise.resolve(t)) as Thenable<TopicEntry | undefined>[];
 
@@ -97,14 +102,86 @@ export class Topic implements TopicEntry {
 
 const _MD_FILETYPES = ["md"];
 
+function getLinks(t: marked.Token): string[] {
+  var links = [];
+  if ("href" in t) {
+    links.push(t.href);
+  }
+
+  if ("tokens" in t && t.tokens !== undefined) {
+    for (const subT of t.tokens) {
+      for (const l of getLinks(subT)) {
+        links.push(l);
+      }
+    }
+  }
+
+  return links;
+}
+
+function isArticleLink(l: string | null): boolean {
+  if (l === null) {
+    return false;
+  } else if (l.length === 0) {
+    return false;
+  } else if (l[0] !== "/") {
+    // NOTE: This skips over a *lot* of true positives
+    // Relative internal linking is definitely a thing.
+    return false;
+  }
+
+  return true;
+}
+
 export class Article implements TopicEntry {
   public type: EntryType;
+  // NOTE: We don't care about tracking external links here, this is only for internal article links.
+  private links: Thenable<vscode.Uri[]> | undefined;
 
-  constructor(public title: string, public uri: vscode.Uri) {
+  constructor(
+    public title: string,
+    public uri: vscode.Uri,
+    public rootUri: vscode.Uri
+  ) {
     this.type = EntryType.Article;
   }
 
-  static fromUri(uri: vscode.Uri): Thenable<Article | undefined> {
+  getLinks(): Thenable<vscode.Uri[]> {
+    if (this.links !== undefined) {
+      return Promise.resolve(this.links);
+    }
+
+    const links = vscode.workspace.fs
+      .readFile(this.uri)
+      .then((text) => {
+        const tokens = marked.lexer(text.toString());
+        const inlineLinks = tokens
+          .map(getLinks)
+          .reduce((acc, i) => acc.concat(i), [])
+          .filter(isArticleLink);
+
+        const freeLinks = Object.entries(tokens.links)
+          .map(([, link]) => link.href)
+          .filter(isArticleLink)
+          .filter((l) => l !== null) as string[];
+
+        const toUri = (l: string): vscode.Uri => {
+          return vscode.Uri.joinPath(this.rootUri, l);
+        };
+        return inlineLinks.concat(freeLinks).map(toUri);
+      })
+      .then((links) => links.filter((l) => l !== undefined)) as Thenable<
+      vscode.Uri[]
+    >;
+
+    this.links = links;
+    return links;
+  }
+
+  static fromUri(
+    uri: vscode.Uri,
+    rootUri: vscode.Uri
+  ): Thenable<Article | undefined> {
     const extension = uri.path.split(".").reverse()[0];
     if (!_MD_FILETYPES.includes(extension)) {
       return Promise.resolve(undefined);
@@ -115,7 +192,7 @@ export class Article implements TopicEntry {
         return undefined;
       }
 
-      return new Article(name, uri);
+      return new Article(name, uri, rootUri);
     });
   }
 }
@@ -135,7 +212,7 @@ export function workspaceDb(): TopicDb {
   const wsFolders = vscode.workspace.workspaceFolders ?? [];
   const ignore = JournalrConfig.fromConfig().ignoreGlobs;
   const topics = wsFolders.map((f) => {
-    return new Topic(f.name, f.uri, true, ignore);
+    return new Topic(f.name, f.uri, f.uri, ignore);
   });
 
   return new TopicDb(topics);

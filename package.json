@@ -237,6 +237,7 @@
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
+    "@types/marked": "^1.1.0",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.11.0",
     "@types/vscode": "^1.46.0",
@@ -253,6 +254,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "marked": "^1.1.0",
     "moment": "^2.27.0"
   }
 }

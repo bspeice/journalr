@@ -17,7 +17,7 @@ async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
 }
 
 function topicToTreeItem(topic: Topic): vscode.TreeItem {
-  const collapsibleState = topic.isRoot
+  const collapsibleState = topic.isRoot()
     ? vscode.TreeItemCollapsibleState.Expanded
     : vscode.TreeItemCollapsibleState.Collapsed;
   return {

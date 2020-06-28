@@ -17,8 +17,6 @@
 - Display article backlinks. Note that this is essentially the same problem as moving a note.
   May be worth looking at [Foam](https://github.com/foambubble/foam) for how they handle performance? Or just using outright?
   - Turns out Foam simply scans *everything*: https://github.com/foambubble/foam-vscode/blob/965fca3bdd840ba08db6846e20ad605b5b51d9ea/src/workspace.ts#L9
-- Exclude folders and files based on glob expressions - want to make sure that `.git` isn't scanned for example.
-  Might be worth looking into an [external lib](https://github.com/isaacs/minimatch) for handling.
 - Include files based on extension; don't attempt to load anything non-markdown. If files lie about the extension, oh well.
 - Remember opened topics on restart
   - Not sure what the best way to remember state is; readonly config variable?
