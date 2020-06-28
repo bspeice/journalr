@@ -3,7 +3,7 @@
   "displayName": "journalr",
   "description": "",
   "publisher": "bspeice",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.46.0"
   },
