@@ -31,3 +31,7 @@ export async function noteTitle(
 
   return doc.getText(range) === "# " ? doc.lineAt(0).text.slice(2) : undefined;
 }
+
+export function encodeUriMd(uri: vscode.Uri | string): string {
+  return uri.toString().replace(" ", "%20");
+}

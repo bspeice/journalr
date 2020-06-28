@@ -7,7 +7,6 @@
   Properly handling exclusions is going to be crucial here.
 
 ## Topic Browser
-- URI encoding? Handling spaces is weird. `encodeURI` doesn't handle spaces at all, and `encodeURIComponent` improperly replaces `/`
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as "drag and drop",
   but it appears that VS Code [doesn't currently support this](https://github.com/Microsoft/vscode/issues/32592).
   This would be *incredibly* complicated to do correctly and is considered low priority.

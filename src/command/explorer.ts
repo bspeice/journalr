@@ -12,7 +12,8 @@ export async function createNote(fileUri: vscode.Uri, config: JournalrConfig) {
 
 export async function copyId(fileUri: vscode.Uri, _config: JournalrConfig) {
   const relpath = vscode.workspace.asRelativePath(fileUri);
+  const mdEscape = utils.encodeUriMd(relpath);
   const title = await utils.noteTitle(fileUri);
 
-  vscode.env.clipboard.writeText(`[${title}](/${relpath})`);
+  vscode.env.clipboard.writeText(`[${title}](/${mdEscape})`);
 }

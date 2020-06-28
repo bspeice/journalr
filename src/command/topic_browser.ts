@@ -78,10 +78,10 @@ export function copyId(node: TopicEntry): void {
 
   const article = node as Article;
   const relPath = vscode.workspace
-    .asRelativePath(article.uri)
-    .replace(" ", "%20");
+    .asRelativePath(article.uri);
+  const mdEscape = utils.encodeUriMd(relPath);
 
-  vscode.env.clipboard.writeText(`/${relPath}`);
+  vscode.env.clipboard.writeText(`/${mdEscape}`);
 }
 
 export function copyIdWithTitle(node: TopicEntry): void {
@@ -91,10 +91,10 @@ export function copyIdWithTitle(node: TopicEntry): void {
 
   const article = node as Article;
   const relPath = vscode.workspace
-    .asRelativePath(article.uri)
-    .replace(" ", "%20");
+    .asRelativePath(article.uri);
+  const mdEscape = utils.encodeUriMd(relPath);
 
-  vscode.env.clipboard.writeText(`[${article.title}](/${relPath})`);
+  vscode.env.clipboard.writeText(`[${article.title}](/${mdEscape})`);
 }
 
 export async function showArticle(article: Article): Promise<void> {
