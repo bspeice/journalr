@@ -1,6 +1,5 @@
 # TODO
 
-## General
 - Separate commands from user input; need to add tests, and testing shouldn't rely on manipulating the UI.
   As inspiration, the [Foam](https://github.com/foambubble/foam-workspace-manager) workspace manager has no dependency on VS Code.
   - Could be interesting to make an "Actions" API - describe what should be done, and let someone else resolve the list of actions.
