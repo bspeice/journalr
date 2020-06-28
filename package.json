@@ -47,6 +47,13 @@
           "type": "array",
           "default": [],
           "markdownDescription": "List of format strings to use for the \"Create Journal\" command. See [`momentjs`](https://momentjs.com/docs/#/displaying/format/) for available options."
+        },
+        "journalr.ignoreGlobs": {
+          "type": "array",
+          "default": [
+            "**/.*"
+          ],
+          "description": "File patterns to ignore when scanning notes"
         }
       }
     },
@@ -220,10 +227,10 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "webpack --mode production",
-    "compile": "webpack --mode none",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
     "lint": "eslint src --ext ts",
-    "watch": "webpack --mode none --watch",
+    "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
     "format": "prettier --write src/ package.json tsconfig.json"

@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import * as minimatch from "minimatch";
+import { JournalrConfig } from "./config";
+import { min } from "moment";
 
 export enum EntryType {
   Topic = 1,
@@ -10,13 +13,27 @@ export interface TopicEntry {
   type: EntryType;
 }
 
+function _matches(pattern: vscode.Uri, globs: string[]): boolean {
+  const path = vscode.workspace.asRelativePath(pattern);
+  return globs.some((g) => minimatch(path, g));
+}
+
+function _joinUri(
+  name: string,
+  root: vscode.Uri,
+  ft: vscode.FileType
+): [string, vscode.Uri, vscode.FileType] {
+  return [name, vscode.Uri.joinPath(root, name), ft];
+}
+
 export class Topic implements TopicEntry {
   public type: EntryType;
 
   constructor(
     public title: string,
     public uri: vscode.Uri,
-    public isRoot: boolean
+    public isRoot: boolean,
+    public ignoreGlobs: string[]
   ) {
     this.type = EntryType.Topic;
   }
@@ -24,19 +41,18 @@ export class Topic implements TopicEntry {
   getEntries(): Thenable<TopicEntry[]> {
     const res = vscode.workspace.fs
       .readDirectory(this.uri)
+      .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
+      .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => dirEntries.reverse())
       .then((dirEntries) => {
         const articlePromises = dirEntries
-          .filter(([_, ft]) => ft === vscode.FileType.File)
-          .map(([name, _]) => name)
-          .map((name) => vscode.Uri.joinPath(this.uri, name))
-          .map((uri) => Article.fromUri(uri));
+          .filter(([, , ft]) => ft === vscode.FileType.File)
+          .map(([, uri]) => Article.fromUri(uri));
 
         const topics = dirEntries
-          .filter(([_, ft]) => ft === vscode.FileType.Directory)
-          .map(([name, _]) => name)
-          .map((name) => {
-            return new Topic(name, vscode.Uri.joinPath(this.uri, name), false);
+          .filter(([, , ft]) => ft === vscode.FileType.Directory)
+          .map(([name, uri]) => {
+            return new Topic(name, uri, false, this.ignoreGlobs);
           });
 
         return Promise.all(articlePromises)
@@ -51,6 +67,8 @@ export class Topic implements TopicEntry {
   }
 }
 
+const _MD_FILETYPES = [".md"];
+
 export class Article implements TopicEntry {
   public type: EntryType;
 
@@ -59,6 +77,12 @@ export class Article implements TopicEntry {
   }
 
   static fromUri(uri: vscode.Uri): Thenable<Article | undefined> {
+    const basename = uri.path.split("/").reverse()[0];
+    const extension = basename.split(".").reverse()[0];
+    if (!_MD_FILETYPES.includes(extension)) {
+      return Promise.resolve(undefined);
+    }
+
     return utils.noteTitle(uri).then((name) => {
       if (name === undefined) {
         return undefined;
@@ -75,8 +99,9 @@ export interface TopicDb {
 
 export function workspaceDb(): TopicDb {
   const wsFolders = vscode.workspace.workspaceFolders ?? [];
+  const ignore = JournalrConfig.fromConfig().ignoreGlobs;
   const topics = wsFolders.map((f) => {
-    return new Topic(f.name, f.uri, true);
+    return new Topic(f.name, f.uri, true, ignore);
   });
 
   return {

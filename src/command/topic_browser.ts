@@ -26,13 +26,15 @@ export async function createTopic(node: TopicEntry): Promise<boolean> {
 export async function createRootTopic(): Promise<boolean> {
   const wsFolders = vscode.workspace.workspaceFolders ?? [];
   if (wsFolders.length !== 1) {
-    vscode.window.showWarningMessage(`Unexpected wsFolder length=${wsFolders.length}`);
+    vscode.window.showWarningMessage(
+      `Unexpected wsFolder length=${wsFolders.length}`
+    );
     return false;
   }
   const wsRoot = wsFolders[0].uri;
 
   const topicName = await vscode.window.showInputBox({
-    placeHolder: "Topic Name"
+    placeHolder: "Topic Name",
   });
   if (topicName === undefined) {
     return false;
@@ -77,8 +79,7 @@ export function copyId(node: TopicEntry): void {
   }
 
   const article = node as Article;
-  const relPath = vscode.workspace
-    .asRelativePath(article.uri);
+  const relPath = vscode.workspace.asRelativePath(article.uri);
   const mdEscape = utils.encodeUriMd(relPath);
 
   vscode.env.clipboard.writeText(`/${mdEscape}`);
@@ -90,8 +91,7 @@ export function copyIdWithTitle(node: TopicEntry): void {
   }
 
   const article = node as Article;
-  const relPath = vscode.workspace
-    .asRelativePath(article.uri);
+  const relPath = vscode.workspace.asRelativePath(article.uri);
   const mdEscape = utils.encodeUriMd(relPath);
 
   vscode.env.clipboard.writeText(`[${article.title}](/${mdEscape})`);
