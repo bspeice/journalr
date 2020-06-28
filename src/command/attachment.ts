@@ -9,14 +9,16 @@ async function _importAttachments(
   attachmentUris: vscode.Uri[]
 ): Promise<string[]> {
   var attachmentNames = [];
-  for (const fileUri of attachmentUris) {
+  for (const [i, fileUri] of attachmentUris.entries()) {
     const extensionSplit = fileUri.fsPath.split(".");
     const extension =
       extensionSplit.length > 1
         ? `.${extensionSplit[extensionSplit.length - 1]}`
         : ``;
+
+    const tag = attachmentUris.length !== 1 ? `_${i}` : "";
     const attachmentName = now.format(
-      `${config.attachmentFormat}[${extension}]`
+      `${config.attachmentFormat}[${tag}${extension}]`
     );
     const attachmentUri = vscode.Uri.joinPath(attachmentRoot, attachmentName);
 
