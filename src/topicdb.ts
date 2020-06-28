@@ -53,21 +53,21 @@ export class Topic implements TopicEntry {
           .filter(([, , ft]) => ft === vscode.FileType.Directory)
           .map(([name, uri]) => {
             return new Topic(name, uri, false, this.ignoreGlobs);
-          });
+          }) as TopicEntry[];
 
         return Promise.all(articlePromises)
           .then(
             (articles) =>
               articles.filter((a) => a !== undefined) as TopicEntry[]
           )
-          .then((articles) => articles.concat(topics));
+          .then((articles) => topics.concat(articles));
       });
 
     return res;
   }
 }
 
-const _MD_FILETYPES = [".md"];
+const _MD_FILETYPES = ["md"];
 
 export class Article implements TopicEntry {
   public type: EntryType;
