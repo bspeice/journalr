@@ -16,5 +16,6 @@
 - Include files based on extension; don't attempt to load anything non-markdown. If files lie about the extension, oh well.
 - Remember opened topics on restart
   - Not sure what the best way to remember state is; readonly config variable?
+  - Using [`workspaceState`](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#data-storage) is actually probably the better way to go.
 - Copy Note ID with/out title in explorer menu
 - Only show first N articles for each topic, and allow people to expand to more. Should be a display-only issue; all other commands should operate on all articles/topics.
