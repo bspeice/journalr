@@ -9,7 +9,7 @@
   Properly handling exclusions is going to be crucial here.
   - Could potentially just have article titles as part of ["Open symbol by name"](https://code.visualstudio.com/Docs/editor/editingevolved#_open-symbol-by-name0)?
     Would involve writing a [`DocumentSymbolProvider`](https://code.visualstudio.com/api/references/vscode-api#DocumentSymbolProvider)
-- Using the same "Ctrl-P" handler for copying note IDs would also be nice, rather than having to remember *exactly* where it was.
+- Quick pick options for "Copy Note ID" and "Create Note"; would be nice quickly access notes when you already remember the title or can remember parts of it.
 - Documentation - [Typedoc](http://typedoc.org/) will likely be the way to go.
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as "drag and drop",
   but it appears that VS Code [doesn't currently support this](https://github.com/Microsoft/vscode/issues/32592).
