@@ -33,5 +33,5 @@ export async function noteTitle(
 }
 
 export function encodeUriMd(uri: vscode.Uri | string): string {
-  return uri.toString().replace(" ", "%20");
+  return uri.toString().replace(/ /g, "%20");
 }

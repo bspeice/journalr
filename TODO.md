@@ -5,11 +5,7 @@
   - Could be interesting to make an "Actions" API - describe what should be done, and let someone else resolve the list of actions.
     Problem is that expressing error handling is way more difficult.
 - Workspace file watcher to trigger refresh rather than commands triggering static callbacks.
-- Ctrl-P handler for opening notes by title. Will potentially be a performance issue because it requires scanning the entire DB.
-  Properly handling exclusions is going to be crucial here.
-  - Could potentially just have article titles as part of ["Open symbol by name"](https://code.visualstudio.com/Docs/editor/editingevolved#_open-symbol-by-name0)?
-    Would involve writing a [`DocumentSymbolProvider`](https://code.visualstudio.com/api/references/vscode-api#DocumentSymbolProvider)
-- Quick pick options for "Copy Note ID" and "Create Note"; would be nice quickly access notes when you already remember the title or can remember parts of it.
+- Quick pick options for "Copy Note ID", "Create Note", and "Open Note"; would be nice quickly access notes when you already remember the title or can remember parts of it.
 - Documentation - [Typedoc](http://typedoc.org/) will likely be the way to go.
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as "drag and drop",
   but it appears that VS Code [doesn't currently support this](https://github.com/Microsoft/vscode/issues/32592).
