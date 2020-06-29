@@ -17,4 +17,3 @@
 - Remember opened topics on restart
   - Not sure what the best way to remember state is; readonly config variable?
 - Copy Note ID with/out title in explorer menu
-gg
