@@ -17,3 +17,4 @@
 - Remember opened topics on restart
   - Not sure what the best way to remember state is; readonly config variable?
 - Copy Note ID with/out title in explorer menu
+- Only show first N articles for each topic, and allow people to expand to more. Should be a display-only issue; all other commands should operate on all articles/topics.
