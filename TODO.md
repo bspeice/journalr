@@ -19,3 +19,5 @@
   - Using [`workspaceState`](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#data-storage) is actually probably the better way to go.
 - Copy Note ID with/out title in explorer menu
 - Only show first N articles for each topic, and allow people to expand to more. Should be a display-only issue; all other commands should operate on all articles/topics.
+- Create note with title vs. create note with datestamp? Would allow people to be flexible with naming files whatever they wanted, can still infer the actual name from note content.
+- Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for the first `h1`?
