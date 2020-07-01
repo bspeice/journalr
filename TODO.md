@@ -6,7 +6,7 @@
   - Could be interesting to make an "Actions" API - describe what should be done, and let someone
     else resolve the list of actions. Problem is that expressing error handling is way more
     difficult.
-- Surgical TopicDB invalidation; right now it just triggers a full rescan
+- Surgical TopicDB invalidation; right now it just triggers a full rescan. Cancellation tokens as well.
 - Quick pick options for "Copy Note ID", "Create Note", and "Open Note"; would be nice quickly
   access notes when you already remember the title or can remember parts of it.
 - Documentation - [Typedoc](http://typedoc.org/) will likely be the way to go.

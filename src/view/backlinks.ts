@@ -1,0 +1,71 @@
+import * as vscode from "vscode";
+import { DatabaseWatcher, Topic, TopicDb, Article } from "../topicdb";
+
+export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    Article | undefined
+  > = new vscode.EventEmitter<Article | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<Article | undefined> = this
+    ._onDidChangeTreeData.event;
+
+  private currentEditor: vscode.TextEditor | undefined;
+  private currentDatabase: TopicDb;
+
+  constructor(dbWatcher: DatabaseWatcher) {
+    this.currentEditor = vscode.window.activeTextEditor;
+    vscode.window.onDidChangeActiveTextEditor(this.refreshEditor, this);
+
+    this.currentDatabase = dbWatcher.currentDb();
+    dbWatcher.onRefresh(this.refreshDb, this);
+  }
+
+  refreshDb(topicDb: TopicDb) {
+    this.currentDatabase = topicDb;
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
+  refreshEditor(editor: vscode.TextEditor | undefined) {
+    this.currentEditor = editor;
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
+  getTreeItem(element: Article): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    return {
+      resourceUri: element.uri,
+    };
+  }
+
+  // Because backlinks is a flat list, we always operate at "root", and the element is
+  // always undefined.
+  getChildren(_e?: Article | undefined): vscode.ProviderResult<Article[]> {
+    if (this.currentEditor === undefined) {
+      return [];
+    }
+
+    const currentUri = this.currentEditor.document.uri;
+    console.log(`Getting article for uri=${currentUri.path}`);
+
+    const currentArticle = this.currentDatabase
+      .allArticles()
+      .then((articles) =>
+        articles.filter((a) => a.uri.fsPath === currentUri.fsPath)
+      )
+      .then((matches) => (matches.length !== 0 ? matches[0] : undefined))
+      .then((a) => {
+        console.log(`Getting backlinks for article=${a}`);
+        return a;
+      });
+
+    return currentArticle.then((a) => {
+      if (a === undefined) {
+        return [];
+      }
+
+      const backlinks = this.currentDatabase.backLinks(a);
+      return backlinks.then((b) => {
+        console.log(b);
+        return b;
+      });
+    });
+  }
+}

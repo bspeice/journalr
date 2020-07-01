@@ -89,8 +89,6 @@ export function copyIdWithTitle(node: TopicEntry): void {
 }
 
 export async function showArticle(article: Article): Promise<void> {
-  const links = await article.getLinks();
-  console.log(links);
   const doc = await vscode.workspace.openTextDocument(article.uri);
   await vscode.window.showTextDocument(doc);
 }

@@ -3,6 +3,7 @@ import * as minimatch from "minimatch";
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import { JournalrConfig } from "./config";
+import { link } from "fs";
 
 export enum EntryType {
   Topic = 1,
@@ -168,15 +169,16 @@ export class Article implements TopicEntry {
           .reduce((acc, i) => acc.concat(i), [])
           .filter(isArticleLink);
 
-        const freeLinks = Object.entries(tokens.links)
+        const freestandingLinks = Object.entries(tokens.links)
           .map(([, link]) => link.href)
           .filter(isArticleLink)
           .filter((l) => l !== null) as string[];
 
         const toUri = (l: string): vscode.Uri => {
-          return vscode.Uri.joinPath(this.rootUri, l);
+          const decoded = decodeURI(l);
+          return vscode.Uri.joinPath(this.rootUri, decoded);
         };
-        return inlineLinks.concat(freeLinks).map(toUri);
+        return inlineLinks.concat(freestandingLinks).map(toUri);
       })
       .then((links) => links.filter((l) => l !== undefined)) as Thenable<
       vscode.Uri[]
@@ -184,6 +186,10 @@ export class Article implements TopicEntry {
 
     this.links = links;
     return links;
+  }
+
+  zippedLinks(): Thenable<[Article, vscode.Uri][]> {
+    return this.getLinks().then((links) => links.map((l) => [this, l]));
   }
 
   refresh() {
@@ -213,7 +219,24 @@ export class TopicDb {
   constructor(public topics: Topic[]) {}
 
   allArticles(): Thenable<Article[]> {
-    return Promise.resolve([]);
+    const articlesPromises = this.topics.map((t) => t.recurseArticles());
+    const allArticles = Promise.all(articlesPromises);
+
+    return allArticles.then((nested) =>
+      nested.reduce((acc, a) => acc.concat(a), [])
+    );
+  }
+
+  backLinks(needle: Article): Thenable<Article[]> {
+    const haystack = this.allArticles()
+      .then((articles) => Promise.all(articles.map((a) => a.zippedLinks())))
+      .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
+
+    return haystack.then((pairs) => {
+      return pairs
+        .filter(([, link]) => link.fsPath === needle.uri.fsPath)
+        .map(([article]) => article);
+    });
   }
 }
 

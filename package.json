@@ -14,6 +14,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onView:journalr.backlinks",
     "onView:journalr.topicBrowser",
     "onCommand:journalr.journal.createJournal",
     "onCommand:journalr.attachment.insertAttachment",
@@ -235,6 +236,10 @@
     },
     "views": {
       "explorer": [
+        {
+          "id": "journalr.backlinks",
+          "name": "Backlinks"
+        },
         {
           "id": "journalr.topicBrowser",
           "name": "Topics"
