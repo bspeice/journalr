@@ -60,7 +60,7 @@ export class Topic implements TopicEntry {
       .then((dirEntries) => {
         const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(uri, this.rootUri))
+          .map(([, uri]) => Article.fromUri(uri, this.rootUri, vscode.workspace.fs.readFile))
           .reverse();
 
         const topics = dirEntries
@@ -150,7 +150,8 @@ export class Article implements TopicEntry {
   constructor(
     public title: string,
     public uri: vscode.Uri,
-    public rootUri: vscode.Uri
+    public rootUri: vscode.Uri,
+    public content: Thenable<Uint8Array>
   ) {
     this.type = EntryType.Article;
   }
@@ -160,8 +161,7 @@ export class Article implements TopicEntry {
       return Promise.resolve(this.links);
     }
 
-    const links = vscode.workspace.fs
-      .readFile(this.uri)
+    const links = this.content
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
@@ -198,7 +198,8 @@ export class Article implements TopicEntry {
 
   static fromUri(
     uri: vscode.Uri,
-    rootUri: vscode.Uri
+    rootUri: vscode.Uri,
+    reader: (uri: vscode.Uri) => Thenable<Uint8Array>
   ): Thenable<Article | undefined> {
     const extension = uri.path.split(".").reverse()[0];
     if (!utils.MD_EXTENSIONS.includes(extension)) {
@@ -210,7 +211,7 @@ export class Article implements TopicEntry {
         return undefined;
       }
 
-      return new Article(name, uri, rootUri);
+      return new Article(name, uri, rootUri, reader(uri));
     });
   }
 }
