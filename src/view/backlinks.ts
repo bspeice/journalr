@@ -43,7 +43,6 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
     }
 
     const currentUri = this.currentEditor.document.uri;
-    console.log(`Getting article for uri=${currentUri.path}`);
 
     const currentArticle = this.currentDatabase
       .allArticles()
@@ -52,20 +51,11 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
       )
       .then((matches) => (matches.length !== 0 ? matches[0] : undefined))
       .then((a) => {
-        console.log(`Getting backlinks for article=${a}`);
         return a;
       });
 
-    return currentArticle.then((a) => {
-      if (a === undefined) {
-        return [];
-      }
-
-      const backlinks = this.currentDatabase.backLinks(a);
-      return backlinks.then((b) => {
-        console.log(b);
-        return b;
-      });
-    });
+    return currentArticle.then((a) =>
+      a !== undefined ? this.currentDatabase.backLinks(a) : []
+    );
   }
 }
