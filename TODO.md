@@ -28,3 +28,4 @@
   the first `h1`?
 - Events for config values being updated
 - Delete note from topic browser
+- Create root note

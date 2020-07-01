@@ -1,6 +1,13 @@
 import * as vscode from "vscode";
 import { DatabaseWatcher, Topic, TopicDb, Article } from "../topicdb";
 
+function articleToTreeItem(a: Article): vscode.TreeItem {
+  return {
+    label: a.title,
+    resourceUri: a.uri
+  }
+}
+
 export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
   private _onDidChangeTreeData: vscode.EventEmitter<
     Article | undefined
@@ -30,9 +37,7 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
   }
 
   getTreeItem(element: Article): vscode.TreeItem | Thenable<vscode.TreeItem> {
-    return {
-      resourceUri: element.uri,
-    };
+    return articleToTreeItem(element);
   }
 
   // Because backlinks is a flat list, we always operate at "root", and the element is
