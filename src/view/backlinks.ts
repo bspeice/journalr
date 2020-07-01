@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
 import { DatabaseWatcher, Topic, TopicDb, Article } from "../topicdb";
+import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
 
 function articleToTreeItem(a: Article): vscode.TreeItem {
   return {
     label: a.title,
-    resourceUri: a.uri
-  }
+    resourceUri: a.uri,
+  };
 }
 
 export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
@@ -50,7 +51,7 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
     const currentUri = this.currentEditor.document.uri;
 
     const currentArticle = this.currentDatabase
-      .allArticles()
+      .allArticles(VSC_DIRREADER)
       .then((articles) =>
         articles.filter((a) => a.uri.fsPath === currentUri.fsPath)
       )
@@ -60,7 +61,9 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
       });
 
     return currentArticle.then((a) =>
-      a !== undefined ? this.currentDatabase.backLinks(a) : []
+      a !== undefined
+        ? this.currentDatabase.backLinks(a, VSC_DIRREADER, VSC_FILEREADER)
+        : []
     );
   }
 }

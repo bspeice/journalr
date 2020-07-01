@@ -3,7 +3,9 @@ import * as minimatch from "minimatch";
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import { JournalrConfig } from "./config";
-import { link } from "fs";
+import { link, Dir } from "fs";
+import { FileReader, DirReader } from "./types";
+import { dir } from "console";
 
 export enum EntryType {
   Topic = 1,
@@ -48,19 +50,18 @@ export class Topic implements TopicEntry {
     this.entries = undefined;
   }
 
-  getEntries(): Thenable<TopicEntry[]> {
+  getEntries(dirReader: DirReader): Thenable<TopicEntry[]> {
     if (this.entries !== undefined) {
       return this.entries;
     }
 
-    const entries = vscode.workspace.fs
-      .readDirectory(this.uri)
+    const entries = dirReader(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
         const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(uri, this.rootUri, vscode.workspace.fs.readFile))
+          .map(([, uri]) => Article.fromUri(uri, this.rootUri))
           .reverse();
 
         const topics = dirEntries
@@ -79,8 +80,8 @@ export class Topic implements TopicEntry {
     return entries;
   }
 
-  recurseArticles(): Thenable<Article[]> {
-    const entries = this.getEntries();
+  recurseArticles(dirReader: DirReader): Thenable<Article[]> {
+    const entries = this.getEntries(dirReader);
 
     const articles = entries.then((entries) =>
       entries.filter((e) => e.type === EntryType.Article)
@@ -91,7 +92,7 @@ export class Topic implements TopicEntry {
 
     const topicArticles = topics
       .then((topics) => {
-        return Promise.all(topics.map((t) => t.recurseArticles()));
+        return Promise.all(topics.map((t) => t.recurseArticles(dirReader)));
       })
       .then((articles) =>
         articles.reduce((acc, a) => acc.concat(a), [])
@@ -103,10 +104,12 @@ export class Topic implements TopicEntry {
     ]).then(([topicArticles, articles]) => topicArticles.concat(articles));
   }
 
-  recurseTopics(): Thenable<Topic[]> {
-    return this.getEntries()
+  recurseTopics(dirReader: DirReader): Thenable<Topic[]> {
+    return this.getEntries(dirReader)
       .then((e) => e.filter((e) => e.type === EntryType.Topic) as Topic[])
-      .then((topics) => Promise.all(topics.map((t) => t.recurseTopics())))
+      .then((topics) =>
+        Promise.all(topics.map((t) => t.recurseTopics(dirReader)))
+      )
       .then((topics) => topics.reduce((acc, t) => acc.concat(t), []));
   }
 }
@@ -150,18 +153,17 @@ export class Article implements TopicEntry {
   constructor(
     public title: string,
     public uri: vscode.Uri,
-    public rootUri: vscode.Uri,
-    public content: Thenable<Uint8Array>
+    public rootUri: vscode.Uri
   ) {
     this.type = EntryType.Article;
   }
 
-  getLinks(): Thenable<vscode.Uri[]> {
+  getLinks(fileReader: FileReader): Thenable<vscode.Uri[]> {
     if (this.links !== undefined) {
       return Promise.resolve(this.links);
     }
 
-    const links = this.content
+    const links = fileReader(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
@@ -188,8 +190,10 @@ export class Article implements TopicEntry {
     return links;
   }
 
-  zippedLinks(): Thenable<[Article, vscode.Uri][]> {
-    return this.getLinks().then((links) => links.map((l) => [this, l]));
+  zippedLinks(fileReader: FileReader): Thenable<[Article, vscode.Uri][]> {
+    return this.getLinks(fileReader).then((links) =>
+      links.map((l) => [this, l])
+    );
   }
 
   refresh() {
@@ -198,8 +202,7 @@ export class Article implements TopicEntry {
 
   static fromUri(
     uri: vscode.Uri,
-    rootUri: vscode.Uri,
-    reader: (uri: vscode.Uri) => Thenable<Uint8Array>
+    rootUri: vscode.Uri
   ): Thenable<Article | undefined> {
     const extension = uri.path.split(".").reverse()[0];
     if (!utils.MD_EXTENSIONS.includes(extension)) {
@@ -211,7 +214,7 @@ export class Article implements TopicEntry {
         return undefined;
       }
 
-      return new Article(name, uri, rootUri, reader(uri));
+      return new Article(name, uri, rootUri);
     });
   }
 }
@@ -219,8 +222,10 @@ export class Article implements TopicEntry {
 export class TopicDb {
   constructor(public topics: Topic[]) {}
 
-  allArticles(): Thenable<Article[]> {
-    const articlesPromises = this.topics.map((t) => t.recurseArticles());
+  allArticles(dirReader: DirReader): Thenable<Article[]> {
+    const articlesPromises = this.topics.map((t) =>
+      t.recurseArticles(dirReader)
+    );
     const allArticles = Promise.all(articlesPromises);
 
     return allArticles.then((nested) =>
@@ -228,9 +233,15 @@ export class TopicDb {
     );
   }
 
-  backLinks(needle: Article): Thenable<Article[]> {
-    const haystack = this.allArticles()
-      .then((articles) => Promise.all(articles.map((a) => a.zippedLinks())))
+  backLinks(
+    needle: Article,
+    dirReader: DirReader,
+    fileReader: FileReader
+  ): Thenable<Article[]> {
+    const haystack = this.allArticles(dirReader)
+      .then((articles) =>
+        Promise.all(articles.map((a) => a.zippedLinks(fileReader)))
+      )
       .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
 
     return haystack.then((pairs) => {
