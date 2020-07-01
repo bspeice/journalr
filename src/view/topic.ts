@@ -7,6 +7,7 @@ import {
   Article,
   DatabaseWatcher,
 } from "../topicdb";
+import { VSC_DIRREADER } from "../types";
 
 async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
   return {
@@ -78,7 +79,7 @@ export class TopicBrowserProvider
     if (element === undefined) {
       const topics = this.topicDb.topics;
       if (topics.length === 1) {
-        return this.topicDb.topics[0].getEntries();
+        return this.topicDb.topics[0].getEntries(VSC_DIRREADER);
       }
 
       return topics;
@@ -86,7 +87,7 @@ export class TopicBrowserProvider
 
     if (element.type === EntryType.Topic) {
       const e = element as Topic;
-      return e.getEntries();
+      return e.getEntries(VSC_DIRREADER);
     }
 
     // Articles don't have children
