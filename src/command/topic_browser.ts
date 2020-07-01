@@ -59,7 +59,7 @@ export async function createNote(
   const formatted = moment.format(config.contextMenuFormat);
   const noteUri = vscode.Uri.joinPath(topic.uri, formatted);
 
-  const titleSnippet = new vscode.SnippetString(`# $1\n\n$2\n`);
+  const titleSnippet = new vscode.SnippetString(`# `);
   const doc = await utils.createNote(noteUri).then(utils.openNote);
   return await doc.insertSnippet(titleSnippet);
 }

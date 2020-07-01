@@ -1,5 +1,12 @@
 import * as vscode from "vscode";
-import { TopicDb, TopicEntry, EntryType, Topic, Article } from "../topicdb";
+import {
+  TopicDb,
+  TopicEntry,
+  EntryType,
+  Topic,
+  Article,
+  DatabaseWatcher,
+} from "../topicdb";
 
 async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
   return {
@@ -36,10 +43,17 @@ export class TopicBrowserProvider
   readonly onDidChangeTreeData: vscode.Event<TopicEntry | undefined> = this
     ._onDidChangeTreeData.event;
 
-  constructor(public topicDb: TopicDb) {}
+  private topicDb: TopicDb;
 
-  refresh(topicDb: TopicDb): void {
-    this.topicDb = topicDb;
+  constructor(watcher: DatabaseWatcher) {
+    this.topicDb = watcher.currentDb();
+    watcher.onRefresh(this.refresh, this);
+  }
+
+  refresh(topicDb?: TopicDb): void {
+    if (topicDb !== undefined) {
+      this.topicDb = topicDb;
+    }
     this._onDidChangeTreeData.fire(undefined);
   }
 
@@ -62,11 +76,12 @@ export class TopicBrowserProvider
     element?: TopicEntry | undefined
   ): vscode.ProviderResult<TopicEntry[]> {
     if (element === undefined) {
-      if (this.topicDb.topics.length === 1) {
+      const topics = this.topicDb.topics;
+      if (topics.length === 1) {
         return this.topicDb.topics[0].getEntries();
       }
 
-      return this.topicDb.topics;
+      return topics;
     }
 
     if (element.type === EntryType.Topic) {

@@ -3,7 +3,6 @@ import * as minimatch from "minimatch";
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import { JournalrConfig } from "./config";
-import { link } from "fs";
 
 export enum EntryType {
   Topic = 1,
@@ -42,6 +41,10 @@ export class Topic implements TopicEntry {
 
   isRoot(): boolean {
     return this.uri === this.rootUri;
+  }
+
+  refresh() {
+    this.entries = undefined;
   }
 
   getEntries(): Thenable<TopicEntry[]> {
@@ -98,9 +101,14 @@ export class Topic implements TopicEntry {
       articles,
     ]).then(([topicArticles, articles]) => topicArticles.concat(articles));
   }
-}
 
-const _MD_FILETYPES = ["md"];
+  recurseTopics(): Thenable<Topic[]> {
+    return this.getEntries()
+      .then((e) => e.filter((e) => e.type === EntryType.Topic) as Topic[])
+      .then((topics) => Promise.all(topics.map((t) => t.recurseTopics())))
+      .then((topics) => topics.reduce((acc, t) => acc.concat(t), []));
+  }
+}
 
 function getLinks(t: marked.Token): string[] {
   var links = [];
@@ -178,12 +186,16 @@ export class Article implements TopicEntry {
     return links;
   }
 
+  refresh() {
+    this.links = undefined;
+  }
+
   static fromUri(
     uri: vscode.Uri,
     rootUri: vscode.Uri
   ): Thenable<Article | undefined> {
     const extension = uri.path.split(".").reverse()[0];
-    if (!_MD_FILETYPES.includes(extension)) {
+    if (!utils.MD_EXTENSIONS.includes(extension)) {
       return Promise.resolve(undefined);
     }
 
@@ -204,16 +216,63 @@ export class TopicDb {
     return Promise.resolve([]);
   }
 }
-export interface TopicDb {
-  topics: Topic[];
+
+export interface DatabaseWatcher {
+  onRefresh: vscode.Event<TopicDb>;
+  currentDb(): TopicDb;
 }
 
-export function workspaceDb(): TopicDb {
-  const wsFolders = vscode.workspace.workspaceFolders ?? [];
-  const ignore = JournalrConfig.fromConfig().ignoreGlobs;
-  const topics = wsFolders.map((f) => {
-    return new Topic(f.name, f.uri, f.uri, ignore);
-  });
+export class WorkspaceWatcher implements DatabaseWatcher {
+  private database: TopicDb;
+  private watcher: vscode.FileSystemWatcher;
+  private emitter: vscode.EventEmitter<TopicDb>;
 
-  return new TopicDb(topics);
+  public onRefresh: vscode.Event<TopicDb>;
+
+  constructor(config: JournalrConfig) {
+    const wsFolders = vscode.workspace.workspaceFolders ?? [];
+    const ignore = config.ignoreGlobs;
+    const topics = wsFolders.map((f) => {
+      return new Topic(f.name, f.uri, f.uri, ignore);
+    });
+    this.database = new TopicDb(topics);
+
+    this.emitter = new vscode.EventEmitter();
+    this.onRefresh = this.emitter.event;
+
+    this.watcher = vscode.workspace.createFileSystemWatcher(
+      `**/*.{${utils.MD_EXTENSIONS.join(",")}}`
+    );
+    this.watcher.onDidChange(this.onDidChange, this);
+    this.watcher.onDidCreate(this.onDidCreate, this);
+    this.watcher.onDidDelete(this.onDidDelete, this);
+  }
+
+  currentDb(): TopicDb {
+    return this.database;
+  }
+
+  onDidChange(_uri: vscode.Uri) {
+    for (const topic of this.database.topics) {
+      // TODO: Finer-grained invalidation
+      topic.refresh();
+    }
+    this.emitter.fire(this.database);
+  }
+
+  onDidCreate(_uri: vscode.Uri) {
+    for (const topic of this.database.topics) {
+      // TODO: Finer-grained invalidation
+      topic.refresh();
+    }
+    this.emitter.fire(this.database);
+  }
+
+  onDidDelete(_uri: vscode.Uri) {
+    for (const topic of this.database.topics) {
+      // TODO: Finer-grained invalidation
+      topic.refresh();
+    }
+    this.emitter.fire(this.database);
+  }
 }

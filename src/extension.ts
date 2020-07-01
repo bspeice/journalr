@@ -5,7 +5,12 @@ import * as attachment from "./command/attachment";
 import * as explorer from "./command/explorer";
 import * as journal from "./command/journal";
 import { TopicBrowserProvider } from "./view/topic";
-import { workspaceDb, TopicEntry, Article } from "./topicdb";
+import {
+  TopicEntry,
+  Article,
+  DatabaseWatcher,
+  WorkspaceWatcher,
+} from "./topicdb";
 import * as topicBrowser from "./command/topic_browser";
 import moment = require("moment");
 
@@ -53,7 +58,8 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  const topicProvider = new TopicBrowserProvider(workspaceDb());
+  const dbWatcher = new WorkspaceWatcher(JournalrConfig.fromConfig());
+  const topicProvider = new TopicBrowserProvider(dbWatcher);
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
       "journalr.topicBrowser",
@@ -62,7 +68,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.topicBrowser.refresh", () => {
-      topicProvider.refresh(workspaceDb());
+      // TODO: Is this actually useful?
+      // The workspace watcher should be able to track all the relevant invalidations.
+      topicProvider.refresh();
     })
   );
   context.subscriptions.push(
@@ -85,11 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createNote",
       (node: TopicEntry) => {
-        topicBrowser
-          .createNote(node, moment(), JournalrConfig.fromConfig())
-          .then((doRefresh) => {
-            doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
-          });
+        topicBrowser.createNote(node, moment(), JournalrConfig.fromConfig());
       }
     )
   );
@@ -97,9 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createRootTopic",
       () => {
-        topicBrowser.createRootTopic().then((doRefresh) => {
-          doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
-        });
+        topicBrowser.createRootTopic();
       }
     )
   );
@@ -107,9 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createTopic",
       (node: TopicEntry) => {
-        topicBrowser.createTopic(node).then((doRefresh) => {
-          doRefresh ? topicProvider.refresh(workspaceDb()) : undefined;
-        });
+        topicBrowser.createTopic(node);
       }
     )
   );
@@ -122,4 +122,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {}
