@@ -10,10 +10,17 @@ export async function createNote(fileUri: vscode.Uri, config: JournalrConfig) {
   await utils.createNote(noteUri).then(utils.openNote);
 }
 
-export async function copyId(fileUri: vscode.Uri, _config: JournalrConfig) {
+export async function copyId(fileUri: vscode.Uri) {
   const relpath = vscode.workspace.asRelativePath(fileUri);
   const mdEscape = utils.encodeUriMd(relpath);
-  const title = await utils.noteTitle(fileUri);
 
+  vscode.env.clipboard.writeText(mdEscape);
+}
+
+export async function copyIdWithTitle(fileUri: vscode.Uri) {
+  const relpath = vscode.workspace.asRelativePath(fileUri);
+  const mdEscape = utils.encodeUriMd(relpath);
+
+  const title = await utils.noteTitle(fileUri);
   vscode.env.clipboard.writeText(`[${title}](/${mdEscape})`);
 }

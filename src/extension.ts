@@ -40,7 +40,15 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "journalr.explorer.copyId",
       (fileUri: vscode.Uri) => {
-        explorer.copyId(fileUri, JournalrConfig.fromConfig());
+        explorer.copyId(fileUri);
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.explorer.copyIdWithTitle",
+      (fileUri: vscode.Uri) => {
+        explorer.copyIdWithTitle(fileUri);
       }
     )
   );
@@ -114,4 +122,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

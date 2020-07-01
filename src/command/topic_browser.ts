@@ -55,22 +55,13 @@ export async function createNote(
     return false;
   }
 
-  const noteTitle = await vscode.window.showInputBox({
-    placeHolder: "Note Name",
-  });
-  if (!noteTitle) {
-    return false;
-  }
-
   const topic = node as Topic;
   const formatted = moment.format(config.contextMenuFormat);
   const noteUri = vscode.Uri.joinPath(topic.uri, formatted);
 
+  const titleSnippet = new vscode.SnippetString(`# $1\n\n$2\n`);
   const doc = await utils.createNote(noteUri).then(utils.openNote);
-  doc.edit((editor) => {
-    editor.insert(new vscode.Position(0, 0), `# ${noteTitle}\n\n`);
-  });
-  return true;
+  return await doc.insertSnippet(titleSnippet);
 }
 
 export function copyId(node: TopicEntry): void {
