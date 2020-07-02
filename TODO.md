@@ -21,4 +21,6 @@
   display-only issue; all other commands should operate on all articles/topics.
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
+- Forward links in note view for easy navigation
+- Relative-path link handling
 - Create note via quick pick
