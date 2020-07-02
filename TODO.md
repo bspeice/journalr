@@ -19,3 +19,4 @@
 - Relative-path link handling
 - Refresh topicBrowser on creating a new-subtopic; the URI doesn't match anything yet, but it does need to be re-scanned.
 - Some sort of warning for things that *look* like internal links, but can't be resolved? Broken links detector?
+- Maybe base everything on `uri.fsPath` instead of full URI?
