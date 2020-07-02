@@ -9,7 +9,7 @@ export async function showArticle(article: Article): Promise<void> {
 export function register(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "journalr.backlinks.showArticle",
+      "journalr.articleLinks.showArticle",
       (article: Article) => showArticle(article)
     )
   );

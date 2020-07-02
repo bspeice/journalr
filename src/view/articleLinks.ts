@@ -87,7 +87,7 @@ export function register(
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
-      "journalr.backlinks",
+      "journalr.articleLinks",
       backlinkProvider
     )
   );

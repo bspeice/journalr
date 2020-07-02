@@ -18,7 +18,7 @@
     "onView:journalr.topicBrowser",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",
-    "onCommand:journalr.backlinks.showArticle",
+    "onCommand:journalr.articleLinks.showArticle",
     "onCommand:journalr.explorer.createNote",
     "onCommand:journalr.explorer.copyId",
     "onCommand:journalr.explorer.copyIdWithTitle",
@@ -272,8 +272,8 @@
     "views": {
       "explorer": [
         {
-          "id": "journalr.backlinks",
-          "name": "Backlinks"
+          "id": "journalr.articleLinks",
+          "name": "Note Links"
         },
         {
           "id": "journalr.topicBrowser",
