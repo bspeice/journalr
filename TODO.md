@@ -21,3 +21,4 @@
   the first `h1`?
 - Create root note
 - Navigate to backlink notes
+- Create note via quick pick
