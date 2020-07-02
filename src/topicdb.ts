@@ -50,14 +50,13 @@ export class Topic implements TopicEntry {
     this.entries = undefined;
   }
 
-  getEntries(_dirReader: DirReader): Thenable<TopicEntry[]> {
+  getEntries(dirReader: DirReader): Thenable<TopicEntry[]> {
     if (this.entries !== undefined) {
       return this.entries;
     }
 
     // TODO: I'm seeing some weird issues when not using the `readDirectory` function by name
-    const entries = vscode.workspace.fs
-      .readDirectory(this.uri)
+    const entries = dirReader(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
@@ -82,7 +81,7 @@ export class Topic implements TopicEntry {
     return entries;
   }
 
-  findEntry(_dirReader: DirReader, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(dirReader: DirReader, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
     // First, check if it's possible for us to contain this entry
     const thisPathComponents = this.uri.fsPath.split('/');
     const thatPathComponents = uri.fsPath.split('/').slice(0, thisPathComponents.length);
@@ -99,7 +98,7 @@ export class Topic implements TopicEntry {
 
     // For all our entries, if there's a match, return immediately. Otherwise, allow topics
     // to recurse.
-    return this.getEntries(_dirReader)
+    return this.getEntries(dirReader)
     .then((entries) => {
       const toScan = [];
       for (const entry of entries) {
@@ -114,7 +113,7 @@ export class Topic implements TopicEntry {
             return e;
           }
 
-          toScan.push(e.findEntry(_dirReader, uri))
+          toScan.push(e.findEntry(dirReader, uri))
         }
       }
 
@@ -214,14 +213,13 @@ export class Article implements TopicEntry {
     this.type = EntryType.Article;
   }
 
-  getLinks(_fileReader: FileReader): Thenable<vscode.Uri[]> {
+  getLinks(fileReader: FileReader): Thenable<vscode.Uri[]> {
     if (this.links !== undefined) {
       return Promise.resolve(this.links);
     }
 
     // TODO: Getting some weird errors when not referring to `readFile` by name
-    const links = vscode.workspace.fs
-      .readFile(this.uri)
+    const links = fileReader(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
