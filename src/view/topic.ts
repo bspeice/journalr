@@ -142,17 +142,17 @@ export class CollapseTracker {
   }
 
   collapse(t: Topic) {
-    this.expanded.delete(t.uri.path);
+    this.expanded.delete(t.uri.fsPath);
     this.writeState();
   }
 
   expand(t: Topic) {
-    this.expanded.add(t.uri.path);
+    this.expanded.add(t.uri.fsPath);
     this.writeState();
   }
 
   currentState(t: Topic): vscode.TreeItemCollapsibleState {
-    if (t.uri === t.rootUri) {
+    if (t.uri.fsPath === t.rootUri.fsPath) {
       return vscode.TreeItemCollapsibleState.Expanded;
     }
 

@@ -43,7 +43,7 @@ export class Topic implements TopicEntry {
   }
 
   isRoot(): boolean {
-    return this.uri === this.rootUri;
+    return this.uri.fsPath === this.rootUri.fsPath;
   }
 
   invalidate() {
@@ -80,6 +80,55 @@ export class Topic implements TopicEntry {
 
     this.entries = entries;
     return entries;
+  }
+
+  findEntry(_dirReader: DirReader, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+    // First, check if it's possible for us to contain this entry
+    const thisPathComponents = this.uri.fsPath.split('/');
+    const thatPathComponents = uri.fsPath.split('/').slice(0, thisPathComponents.length);
+
+    // WHY THE HELL CAN'T I COMPARE ARRAYS IN JAVASCRIPT???
+    if (thisPathComponents.length !== thatPathComponents.length) {
+      return Promise.resolve(undefined);
+    }
+    const isEqual = thisPathComponents.map((v, i) => v === thatPathComponents[i])
+      .reduce((acc, v) => acc && v, true);
+    if (!isEqual) {
+      return Promise.resolve(undefined);
+    }
+
+    // For all our entries, if there's a match, return immediately. Otherwise, allow topics
+    // to recurse.
+    return this.getEntries(_dirReader)
+    .then((entries) => {
+      const toScan = [];
+      for (const entry of entries) {
+        if (entry.type === EntryType.Article) {
+          const e = entry as Article;
+          if (e.uri.fsPath === uri.fsPath) {
+            return e;
+          }
+        } else if (entry.type === EntryType.Topic) {
+          const e = entry as Topic;
+          if (e.uri.fsPath === uri.fsPath) {
+            return e;
+          }
+
+          toScan.push(e.findEntry(_dirReader, uri))
+        }
+      }
+
+      // We now know everything left to scan; kick off the recursion, and the filter results
+      return Promise.all(toScan).then((matches) => {
+        for (const match of matches) {
+          if (match !== undefined) {
+            return match;
+          }
+        }
+
+        return undefined;
+      })
+    });
   }
 
   recurseArticles(dirReader: DirReader): Thenable<Article[]> {
@@ -199,12 +248,6 @@ export class Article implements TopicEntry {
     return links;
   }
 
-  zippedLinks(fileReader: FileReader): Thenable<[Article, vscode.Uri][]> {
-    return this.getLinks(fileReader).then((links) =>
-      links.map((l) => [this, l])
-    );
-  }
-
   invalidate() {
     this.links = undefined;
   }
@@ -228,6 +271,12 @@ export class Article implements TopicEntry {
   }
 }
 
+function zippedLinks(fileReader: FileReader, article: Article): Thenable<[Article, vscode.Uri][]> {
+  return article.getLinks(fileReader).then((links) =>
+    links.map((l) => [article, l])
+  );
+}
+
 export class TopicDb {
   constructor(public topics: Topic[]) {}
 
@@ -242,6 +291,22 @@ export class TopicDb {
     );
   }
 
+  findEntry(dirReader: DirReader, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+    // TODO: More efficient way to handle this besides resolving all promises?
+    // We only care about the first match. That said, early returns from topics
+    // that know they can't have the element maybe make this less problematic?
+    return Promise.all(this.topics.map((t) => t.findEntry(dirReader, uri)))
+    .then((matches) => {
+      for (const match of matches) {
+        if (match !== undefined) {
+          return match;
+        }
+      }
+      
+      return undefined;
+    })
+  }
+
   allTopics(dirReader: DirReader): Thenable<Topic[]> {
     const topicPromises = this.topics.map((t) => {
       return t.recurseTopics(dirReader);
@@ -249,11 +314,7 @@ export class TopicDb {
     const allTopics = Promise.all(topicPromises);
 
     return allTopics
-      .then((nested) => nested.reduce((acc, t) => acc.concat(t), []))
-      .then((topics) => {
-        console.log(`Length: ${topics.length}`);
-        return topics;
-      });
+      .then((nested) => nested.reduce((acc, t) => acc.concat(t), []));
   }
 
   backLinks(
@@ -263,7 +324,7 @@ export class TopicDb {
   ): Thenable<Article[]> {
     const haystack = this.allArticles(dirReader)
       .then((articles) =>
-        Promise.all(articles.map((a) => a.zippedLinks(fileReader)))
+        Promise.all(articles.map((a) => zippedLinks(fileReader, a)))
       )
       .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
 

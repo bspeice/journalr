@@ -14,7 +14,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:journalr.backlinks",
+    "onView:journalr.articleLinks",
     "onView:journalr.topicBrowser",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",

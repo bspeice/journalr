@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { DatabaseWatcher, TopicDb, Article } from "../topicdb";
+import { DatabaseWatcher, TopicDb, Article, EntryType } from "../topicdb";
 import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
 
 export enum ArticleLinkType {
@@ -99,20 +99,20 @@ export class ArticleLinkProvider
     if (this.currentEditor === undefined) {
       return [];
     }
-    const currentUri = this.currentEditor.document.uri;
 
-    const currentArticle = this.currentDatabase
-      .allArticles(VSC_DIRREADER)
-      .then((articles) =>
-        articles.filter((a) => a.uri.fsPath === currentUri.fsPath)
-      )
-      .then((matches) => (matches.length !== 0 ? matches[0] : undefined))
-      .then((a) => {
-        return a;
-      });
+    const currentUri = this.currentEditor.document.uri;
+    const currentArticle = this.currentDatabase.findEntry(VSC_DIRREADER, currentUri)
+    .then((e) => {
+      if (e !== undefined && e.type === EntryType.Article) {
+        return e as Article;
+      }
+
+      return undefined;
+    });
 
     return currentArticle.then((a) => {
       if (a === undefined) {
+        console.log(`Unable to find ${currentUri}`);
         return [];
       }
 

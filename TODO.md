@@ -17,3 +17,5 @@
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
 - Relative-path link handling
+- Refresh topicBrowser on creating a new-subtopic; the URI doesn't match anything yet, but it does need to be re-scanned.
+- Some sort of warning for things that *look* like internal links, but can't be resolved? Broken links detector?
