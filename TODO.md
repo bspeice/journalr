@@ -20,3 +20,4 @@
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
 - Create root note
+- Navigate to backlink notes
