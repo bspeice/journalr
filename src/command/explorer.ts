@@ -14,7 +14,7 @@ export async function copyId(fileUri: vscode.Uri) {
   const relpath = vscode.workspace.asRelativePath(fileUri);
   const mdEscape = utils.encodeUriMd(relpath);
 
-  vscode.env.clipboard.writeText(mdEscape);
+  vscode.env.clipboard.writeText(`/${mdEscape}`);
 }
 
 export async function copyIdWithTitle(fileUri: vscode.Uri) {
