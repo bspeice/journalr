@@ -1,30 +1,63 @@
 import * as vscode from "vscode";
-import {
-  DatabaseWatcher,
-  TopicDb,
-  Article,
-  WorkspaceWatcher,
-} from "../topicdb";
+import { DatabaseWatcher, TopicDb, Article } from "../topicdb";
 import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
 
-function articleToTreeItem(a: Article): vscode.TreeItem {
-  return {
-    label: a.title,
-    resourceUri: a.uri,
-    contextValue: "journalr.article",
-    command: {
-      title: "Show Article",
-      command: "journalr.topicBrowser.showArticle",
-      arguments: [a],
-    },
-  };
+export enum BacklinkElementType {
+  Backlink = 1,
+  ForwardLink = 2,
+  Article = 3,
 }
 
-export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
+export class BacklinkElement {
+  constructor(public type: BacklinkElementType, public article?: Article) {
+    if (type === BacklinkElementType.Article && article === undefined) {
+      throw new Error("Invalid backlink element");
+    }
+  }
+
+  toTreeItem(): vscode.TreeItem {
+    if (this.type === BacklinkElementType.Backlink) {
+      return {
+        label: "Backlinks",
+        collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+      };
+    } else if (this.type === BacklinkElementType.ForwardLink) {
+      return {
+        label: "Forward Links",
+        collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+      };
+    }
+
+    if (this.article === undefined) {
+      throw new Error("Invalid backlink element");
+    }
+
+    return {
+      label: this.article.title,
+      resourceUri: this.article.uri,
+      contextValue: "journalr.article",
+      command: {
+        title: "Show Article",
+        command: "journalr.topicBrowser.showArticle",
+        arguments: [this.article],
+      },
+    };
+  }
+
+  static fromArticle(a: Article): BacklinkElement {
+    return new BacklinkElement(BacklinkElementType.Article, a);
+  }
+}
+
+const BACKLINK = new BacklinkElement(BacklinkElementType.Backlink);
+const FORWARD_LINK = new BacklinkElement(BacklinkElementType.ForwardLink);
+
+export class BacklinkProvider
+  implements vscode.TreeDataProvider<BacklinkElement> {
   private _onDidChangeTreeData: vscode.EventEmitter<
-    Article | undefined
-  > = new vscode.EventEmitter<Article | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<Article | undefined> = this
+    BacklinkElement | undefined
+  > = new vscode.EventEmitter<BacklinkElement | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<BacklinkElement | undefined> = this
     ._onDidChangeTreeData.event;
 
   private currentEditor: vscode.TextEditor | undefined;
@@ -48,17 +81,24 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  getTreeItem(element: Article): vscode.TreeItem | Thenable<vscode.TreeItem> {
-    return articleToTreeItem(element);
+  getTreeItem(
+    element: BacklinkElement
+  ): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    return element.toTreeItem();
   }
 
-  // Because backlinks is a flat list, we always operate at "root", and the element is
-  // always undefined.
-  getChildren(_e?: Article | undefined): vscode.ProviderResult<Article[]> {
-    if (this.currentEditor === undefined) {
+  getChildren(
+    e?: BacklinkElement | undefined
+  ): vscode.ProviderResult<BacklinkElement[]> {
+    if (e === undefined) {
+      return [BACKLINK, FORWARD_LINK];
+    } else if (e.type === BacklinkElementType.Article) {
       return [];
     }
 
+    if (this.currentEditor === undefined) {
+      return [];
+    }
     const currentUri = this.currentEditor.document.uri;
 
     const currentArticle = this.currentDatabase
@@ -71,11 +111,33 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
         return a;
       });
 
-    return currentArticle.then((a) =>
-      a !== undefined
-        ? this.currentDatabase.backLinks(a, VSC_DIRREADER, VSC_FILEREADER)
-        : []
-    );
+    return currentArticle.then((a) => {
+      if (a === undefined) {
+        return [];
+      }
+
+      if (e.type === BacklinkElementType.ForwardLink) {
+        const articles = a
+          .getLinks(VSC_FILEREADER)
+          .then((links) => {
+            return Promise.all(links.map((l) => Article.fromUri(l, a.rootUri)));
+          })
+          .then((articles) =>
+            articles.filter((a) => a !== undefined)
+          ) as Thenable<Article[]>;
+
+        return articles.then((articles) =>
+          articles.map((a) => BacklinkElement.fromArticle(a))
+        );
+      }
+
+      // Backlinks
+      return this.currentDatabase
+        .backLinks(a, VSC_DIRREADER, VSC_FILEREADER)
+        .then((articles) =>
+          articles.map((a) => BacklinkElement.fromArticle(a))
+        );
+    });
   }
 }
 

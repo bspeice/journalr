@@ -16,5 +16,4 @@
   _incredibly_ complicated to do correctly and is considered low priority.
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
-- Forward links in note view for easy navigation
 - Relative-path link handling
