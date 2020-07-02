@@ -16,12 +16,13 @@
   "activationEvents": [
     "onView:journalr.backlinks",
     "onView:journalr.topicBrowser",
-    "onCommand:journalr.journal.createJournal",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",
+    "onCommand:journalr.backlinks.showArticle",
     "onCommand:journalr.explorer.createNote",
     "onCommand:journalr.explorer.copyId",
     "onCommand:journalr.explorer.copyIdWithTitle",
+    "onCommand:journalr.journal.createJournal",
     "onCommand:journalr.palette.copyId",
     "onCommand:journalr.palette.copyIdWithTitle",
     "onCommand:journalr.palette.openNote",
@@ -77,6 +78,11 @@
       {
         "command": "journalr.attachment.insertImage",
         "title": "Insert Image",
+        "category": "Journalr"
+      },
+      {
+        "command": "journalr.backlinks.showArticle",
+        "title": "Show Article",
         "category": "Journalr"
       },
       {
@@ -158,6 +164,10 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "journalr.backlinks.showArticle",
+          "when": "false"
+        },
         {
           "command": "journalr.explorer.createNote",
           "when": "false"

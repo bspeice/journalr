@@ -11,6 +11,11 @@ function articleToTreeItem(a: Article): vscode.TreeItem {
   return {
     label: a.title,
     resourceUri: a.uri,
+    command: {
+      title: "Show Article",
+      command: "journalr.topicBrowser.showArticle",
+      arguments: [a]
+    }
   };
 }
 
