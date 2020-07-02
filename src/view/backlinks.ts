@@ -11,11 +11,12 @@ function articleToTreeItem(a: Article): vscode.TreeItem {
   return {
     label: a.title,
     resourceUri: a.uri,
+    contextValue: "journalr.article",
     command: {
       title: "Show Article",
       command: "journalr.topicBrowser.showArticle",
-      arguments: [a]
-    }
+      arguments: [a],
+    },
   };
 }
 
@@ -80,9 +81,9 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
 
 export function register(
   context: vscode.ExtensionContext,
-  workspaceWatcher: WorkspaceWatcher
+  databaseWatcher: DatabaseWatcher
 ): BacklinkProvider {
-  const backlinkProvider = new BacklinkProvider(workspaceWatcher);
+  const backlinkProvider = new BacklinkProvider(databaseWatcher);
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(

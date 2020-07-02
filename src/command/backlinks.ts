@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
-import { Article } from '../topicdb';
+import * as vscode from "vscode";
+import { Article } from "../topicdb";
 
 export async function showArticle(article: Article): Promise<void> {
   const doc = await vscode.workspace.openTextDocument(article.uri);

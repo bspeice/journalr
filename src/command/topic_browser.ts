@@ -106,16 +106,8 @@ export async function showArticle(article: Article): Promise<void> {
 
 export function register(
   context: vscode.ExtensionContext,
-  configWatcher: ConfigWatcher,
-  topicBrowser: TopicBrowserProvider
+  configWatcher: ConfigWatcher
 ) {
-  context.subscriptions.push(
-    vscode.commands.registerCommand("journalr.topicBrowser.refresh", () => {
-      // TODO: Is this actually useful?
-      // The workspace watcher should be able to track all the relevant invalidations.
-      topicBrowser.refresh();
-    })
-  );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "journalr.topicBrowser.copyId",

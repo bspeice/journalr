@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { DatabaseWatcher, Article } from "../topicdb";
+import { DatabaseWatcher, Article, TopicDb } from "../topicdb";
 import { VSC_DIRREADER } from "../types";
 import { encodeUriMd } from "../utils";
 
@@ -13,23 +13,17 @@ function articleToDisplayItem(a: Article): string {
   return `/${topicName}${topicTag}${a.title}`;
 }
 
-async function articlePick(
-  dbWatcher: DatabaseWatcher,
-  action: (a: Article) => void
-) {
+async function articlePick(database: TopicDb, action: (a: Article) => void) {
   // Oh Lord this is inefficient, but I'm not sure how else to map the display names
   // to the URIs.
   var articleNames: Map<string, Article> = new Map();
-  const items = dbWatcher
-    .currentDb()
-    .allArticles(VSC_DIRREADER)
-    .then((articles) => {
-      return articles.map((a) => {
-        const display = articleToDisplayItem(a);
-        articleNames.set(display, a);
-        return display;
-      });
+  const items = database.allArticles(VSC_DIRREADER).then((articles) => {
+    return articles.map((a) => {
+      const display = articleToDisplayItem(a);
+      articleNames.set(display, a);
+      return display;
     });
+  });
   const itemPick = await vscode.window.showQuickPick(items);
 
   if (itemPick === undefined) {
@@ -45,22 +39,22 @@ async function articlePick(
   await action(article);
 }
 
-export async function copyNoteId(dbWatcher: DatabaseWatcher) {
-  await articlePick(dbWatcher, (a) => {
+export async function copyNoteId(database: TopicDb) {
+  await articlePick(database, (a) => {
     const relpath = vscode.workspace.asRelativePath(a.uri);
     vscode.env.clipboard.writeText(`/${encodeUriMd(relpath)}`);
   });
 }
 
-export async function copyNoteIdWithTitle(dbWatcher: DatabaseWatcher) {
-  await articlePick(dbWatcher, (a) => {
+export async function copyNoteIdWithTitle(database: TopicDb) {
+  await articlePick(database, (a) => {
     const relpath = vscode.workspace.asRelativePath(a.uri);
     vscode.env.clipboard.writeText(`[${a.title}](/${encodeUriMd(relpath)})`);
   });
 }
 
-export async function openNote(dbWatcher: DatabaseWatcher) {
-  await articlePick(dbWatcher, (a) => {
+export async function openNote(database: TopicDb) {
+  await articlePick(database, (a) => {
     vscode.workspace
       .openTextDocument(a.uri)
       .then((doc) => vscode.window.showTextDocument(doc));
@@ -73,17 +67,17 @@ export function register(
 ) {
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.palette.copyId", () => {
-      copyNoteId(dbWatcher);
+      copyNoteId(dbWatcher.currentDb());
     })
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.palette.copyIdWithTitle", () => {
-      copyNoteIdWithTitle(dbWatcher);
+      copyNoteIdWithTitle(dbWatcher.currentDb());
     })
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.palette.openNote", () =>
-      openNote(dbWatcher)
+      openNote(dbWatcher.currentDb())
     )
   );
 }

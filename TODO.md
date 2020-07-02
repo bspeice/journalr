@@ -21,7 +21,4 @@
   display-only issue; all other commands should operate on all articles/topics.
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
-- Create root note
-- Navigate to backlink notes
 - Create note via quick pick
-- Refresh backlinks

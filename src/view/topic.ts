@@ -55,6 +55,10 @@ export class TopicBrowserProvider
   refresh(topicDb?: TopicDb): void {
     if (topicDb !== undefined) {
       this.topicDb = topicDb;
+    } else {
+      for (const topic of this.topicDb.topics) {
+        topic.refresh();
+      }
     }
     this._onDidChangeTreeData.fire(undefined);
   }

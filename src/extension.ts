@@ -14,14 +14,14 @@ export function activate(context: vscode.ExtensionContext) {
   const configWatcher = new WorkspaceConfig();
   const dbWatcher = new WorkspaceWatcher(configWatcher.currentConfig());
 
-  const topicProvider = topicView.register(context, dbWatcher);
+  topicView.register(context, dbWatcher);
   backlinks.register(context, dbWatcher);
 
   attachment.register(context, configWatcher);
   explorer.register(context, configWatcher);
   journal.register(context, configWatcher);
   palette.register(context, dbWatcher);
-  topicBrowser.register(context, configWatcher, topicProvider);
+  topicBrowser.register(context, configWatcher);
 }
 
 // this method is called when your extension is deactivated
