@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
   attachment.register(context, configWatcher);
   explorer.register(context, configWatcher);
   journal.register(context, configWatcher);
-  palette.register(context, dbWatcher);
+  palette.register(context, dbWatcher, configWatcher);
   topicBrowser.register(context, configWatcher);
 }
 

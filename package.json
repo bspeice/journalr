@@ -18,7 +18,6 @@
     "onView:journalr.topicBrowser",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",
-    "onCommand:journalr.backlinks.refresh",
     "onCommand:journalr.backlinks.showArticle",
     "onCommand:journalr.explorer.createNote",
     "onCommand:journalr.explorer.copyId",
@@ -32,7 +31,6 @@
     "onCommand:journalr.topicBrowser.createNote",
     "onCommand:journalr.topicBrowser.createTopic",
     "onCommand:journalr.topicBrowser.createRootTopic",
-    "onCommand:journalr.topicBrowser.refresh",
     "onCommand:journalr.topicBrowser.showArticle"
   ],
   "main": "./dist/extension.js",
@@ -114,6 +112,11 @@
       {
         "command": "journalr.palette.openNote",
         "title": "Open Note",
+        "category": "Journalr"
+      },
+      {
+        "command": "journalr.palette.createNote",
+        "title": "Create Note",
         "category": "Journalr"
       },
       {
@@ -222,16 +225,6 @@
         }
       ],
       "view/title": [
-        {
-          "command": "journalr.backlinks.refresh",
-          "when": "view == journalr.backlinks",
-          "group": "navigation"
-        },
-        {
-          "command": "journalr.topicBrowser.refresh",
-          "when": "view == journalr.topicBrowser",
-          "group": "navigation"
-        },
         {
           "command": "journalr.topicBrowser.createRootTopic",
           "when": "view == journalr.topicBrowser && workspaceFolderCount == 1",

@@ -109,9 +109,14 @@ export class Topic implements TopicEntry {
   recurseTopics(dirReader: DirReader): Thenable<Topic[]> {
     return this.getEntries(dirReader)
       .then((e) => e.filter((e) => e.type === EntryType.Topic) as Topic[])
-      .then((topics) =>
-        Promise.all(topics.map((t) => t.recurseTopics(dirReader)))
-      )
+      .then((topics) => {
+        const allTopics = [];
+        for (const topic of topics) {
+          allTopics.push(Promise.resolve([topic]));
+          allTopics.push(topic.recurseTopics(dirReader));
+        }
+        return Promise.all(allTopics);
+      })
       .then((topics) => topics.reduce((acc, t) => acc.concat(t), []));
   }
 }
@@ -235,6 +240,20 @@ export class TopicDb {
     return allArticles.then((nested) =>
       nested.reduce((acc, a) => acc.concat(a), [])
     );
+  }
+
+  allTopics(dirReader: DirReader): Thenable<Topic[]> {
+    const topicPromises = this.topics.map((t) => {
+      return t.recurseTopics(dirReader);
+    });
+    const allTopics = Promise.all(topicPromises);
+
+    return allTopics
+      .then((nested) => nested.reduce((acc, t) => acc.concat(t), []))
+      .then((topics) => {
+        console.log(`Length: ${topics.length}`);
+        return topics;
+      });
   }
 
   backLinks(

@@ -23,4 +23,3 @@
   the first `h1`?
 - Forward links in note view for easy navigation
 - Relative-path link handling
-- Create note via quick pick

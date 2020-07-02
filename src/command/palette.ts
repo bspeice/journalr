@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
-import { DatabaseWatcher, Article, TopicDb } from "../topicdb";
+import { DatabaseWatcher, Article, TopicDb, Topic } from "../topicdb";
 import { VSC_DIRREADER } from "../types";
 import { encodeUriMd } from "../utils";
+import * as moment from "moment";
+import { JournalrConfig, ConfigWatcher } from "../config";
 
 function articleToDisplayItem(a: Article): string {
   // Infer the topic it belongs to. Maybe worth tracking this directly in the article?
@@ -13,57 +15,101 @@ function articleToDisplayItem(a: Article): string {
   return `/${topicName}${topicTag}${a.title}`;
 }
 
-async function articlePick(database: TopicDb, action: (a: Article) => void) {
+function topicToDisplayItem(t: Topic): string {
+  const relpath = vscode.workspace.asRelativePath(t.uri);
+  return `/${relpath}`;
+}
+
+async function translatedPick<T>(
+  allItems: Thenable<T[]>,
+  xform: (t: T) => string
+): Promise<T | undefined> {
   // Oh Lord this is inefficient, but I'm not sure how else to map the display names
   // to the URIs.
-  var articleNames: Map<string, Article> = new Map();
-  const items = database.allArticles(VSC_DIRREADER).then((articles) => {
-    return articles.map((a) => {
-      const display = articleToDisplayItem(a);
-      articleNames.set(display, a);
+  const names: Map<string, T> = new Map();
+  const displayItems = allItems.then((ts) => {
+    return ts.map((t) => {
+      const display = xform(t);
+      names.set(display, t);
       return display;
     });
   });
-  const itemPick = await vscode.window.showQuickPick(items);
+  const itemPick = await vscode.window.showQuickPick(displayItems);
 
   if (itemPick === undefined) {
-    return;
+    return undefined;
   }
 
-  const article = articleNames.get(itemPick);
-  if (article === undefined) {
-    // I don't think this is practically reachable?
-    return;
-  }
-
-  await action(article);
+  return names.get(itemPick);
 }
 
 export async function copyNoteId(database: TopicDb) {
-  await articlePick(database, (a) => {
-    const relpath = vscode.workspace.asRelativePath(a.uri);
-    vscode.env.clipboard.writeText(`/${encodeUriMd(relpath)}`);
-  });
+  const articlePick = await translatedPick(
+    database.allArticles(VSC_DIRREADER),
+    articleToDisplayItem
+  );
+
+  if (articlePick === undefined) {
+    return;
+  }
+
+  const relpath = vscode.workspace.asRelativePath(articlePick.uri);
+  await vscode.env.clipboard.writeText(`/${encodeUriMd(relpath)}`);
 }
 
 export async function copyNoteIdWithTitle(database: TopicDb) {
-  await articlePick(database, (a) => {
-    const relpath = vscode.workspace.asRelativePath(a.uri);
-    vscode.env.clipboard.writeText(`[${a.title}](/${encodeUriMd(relpath)})`);
-  });
+  const articlePick = await translatedPick(
+    database.allArticles(VSC_DIRREADER),
+    articleToDisplayItem
+  );
+  if (articlePick === undefined) {
+    return;
+  }
+
+  const relpath = vscode.workspace.asRelativePath(articlePick.uri);
+  await vscode.env.clipboard.writeText(
+    `[${articlePick.title}](/${encodeUriMd(relpath)})`
+  );
+}
+
+export async function createNote(
+  database: TopicDb,
+  config: JournalrConfig,
+  now: moment.Moment
+) {
+  const topicPick = await translatedPick(
+    database.allTopics(VSC_DIRREADER),
+    topicToDisplayItem
+  );
+  if (topicPick === undefined) {
+    return;
+  }
+
+  const formatted = now.format(config.contextMenuFormat);
+  const noteUri = vscode.Uri.joinPath(topicPick.uri, formatted);
+  await vscode.workspace.fs.writeFile(noteUri, new Uint8Array());
+
+  const doc = await vscode.workspace.openTextDocument(noteUri);
+  await vscode.window.showTextDocument(doc);
 }
 
 export async function openNote(database: TopicDb) {
-  await articlePick(database, (a) => {
-    vscode.workspace
-      .openTextDocument(a.uri)
-      .then((doc) => vscode.window.showTextDocument(doc));
-  });
+  const articlePick = await translatedPick(
+    database.allArticles(VSC_DIRREADER),
+    articleToDisplayItem
+  );
+  if (articlePick === undefined) {
+    return;
+  }
+
+  const doc = await vscode.workspace.openTextDocument(articlePick.uri);
+  await vscode.window.showTextDocument(doc);
 }
 
 export function register(
   context: vscode.ExtensionContext,
-  dbWatcher: DatabaseWatcher
+  dbWatcher: DatabaseWatcher,
+  config: ConfigWatcher
 ) {
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.palette.copyId", () => {
@@ -73,6 +119,11 @@ export function register(
   context.subscriptions.push(
     vscode.commands.registerCommand("journalr.palette.copyIdWithTitle", () => {
       copyNoteIdWithTitle(dbWatcher.currentDb());
+    })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("journalr.palette.createNote", () => {
+      createNote(dbWatcher.currentDb(), config.currentConfig(), moment());
     })
   );
   context.subscriptions.push(
