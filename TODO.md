@@ -6,7 +6,9 @@
   - Could be interesting to make an "Actions" API - describe what should be done, and let someone
     else resolve the list of actions. Problem is that expressing error handling is way more
     difficult.
-- Surgical TopicDB invalidation; right now it just triggers a full rescan. Cancellation tokens as well for DB scan operations
+- Surgical TopicDB invalidation; right now it just triggers a full rescan. The ideal is that a full rescan is needed *only* on startup.
+  - Cancellation tokens as well for DB scan operations.
+  - Re-parsing the current file and updating backlinks should be part of this.
 - Documentation - [Typedoc](http://typedoc.org/) will likely be the way to go.
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as
   "drag and drop", but it appears that VS Code
@@ -22,3 +24,4 @@
 - Create root note
 - Navigate to backlink notes
 - Create note via quick pick
+- Refresh backlinks
