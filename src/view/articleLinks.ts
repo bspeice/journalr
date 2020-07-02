@@ -112,7 +112,6 @@ export class ArticleLinkProvider
 
     return currentArticle.then((a) => {
       if (a === undefined) {
-        console.log(`Unable to find ${currentUri}`);
         return [];
       }
 
