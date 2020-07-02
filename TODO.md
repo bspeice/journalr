@@ -21,3 +21,4 @@
 - Some sort of warning for things that *look* like internal links, but can't be resolved? Broken links detector?
 - Maybe base everything on `uri.fsPath` instead of full URI?
 - Allow filenames as note titles; don't want to exclude MD files based on not having a title.
+- Compute back/forward links even if the item isn't in the DB?
