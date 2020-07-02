@@ -1,11 +1,9 @@
 import * as marked from "marked";
 import * as minimatch from "minimatch";
 import * as vscode from "vscode";
-import * as utils from "./utils";
-import { JournalrConfig } from "./config";
-import { link, Dir } from "fs";
-import { FileReader, DirReader } from "./types";
-import { dir } from "console";
+import * as utils from "../utils";
+import { JournalrConfig } from "../config";
+import { FileReader, DirReader } from "../types";
 
 export enum EntryType {
   Topic = 1,
