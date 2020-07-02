@@ -90,6 +90,15 @@ export function copyIdWithTitle(node: TopicEntry): void {
   vscode.env.clipboard.writeText(`[${article.title}](/${mdEscape})`);
 }
 
+export function deleteNote(node: TopicEntry): void {
+  if (node.type !== EntryType.Article) {
+    vscode.window.showErrorMessage(`Unexpected entry type=${node.type}`);
+  }
+
+  const article = node as Article;
+  vscode.workspace.fs.delete(article.uri, {recursive: false});
+}
+
 export async function showArticle(article: Article): Promise<void> {
   const doc = await vscode.workspace.openTextDocument(article.uri);
   await vscode.window.showTextDocument(doc);
@@ -131,6 +140,14 @@ export function register(
       }
     )
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.deleteNote",
+      (node: TopicEntry) => {
+        deleteNote(node)
+      }
+    )
+  )
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createRootTopic",

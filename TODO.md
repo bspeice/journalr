@@ -14,11 +14,6 @@
   "drag and drop", but it appears that VS Code
   [doesn't currently support this](https://github.com/Microsoft/vscode/issues/32592). This would be
   _incredibly_ complicated to do correctly and is considered low priority.
-- Display article backlinks. Note that this is essentially the same problem as moving a note. May be
-  worth looking at [Foam](https://github.com/foambubble/foam) for how they handle performance? Or
-  just using outright?
-  - Turns out Foam simply scans _everything_:
-    https://github.com/foambubble/foam-vscode/blob/965fca3bdd840ba08db6846e20ad605b5b51d9ea/src/workspace.ts#L9
 - Remember opened topics on restart
   - [`workspaceState`](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#data-storage)
     is probably the way to go, but not yet sure how to read the current TreeView state to persist it.
@@ -26,6 +21,4 @@
   display-only issue; all other commands should operate on all articles/topics.
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
-- Events for config values being updated
-- Delete note from topic browser
 - Create root note

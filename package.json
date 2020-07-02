@@ -121,6 +121,12 @@
         "icon": "$(file-directory-create)"
       },
       {
+        "command": "journalr.topicBrowser.deleteNote",
+        "title": "Delete Note",
+        "category": "Journalr",
+        "icon": "$(remove)"
+      },
+      {
         "command": "journalr.topicBrowser.createRootTopic",
         "title": "Create Topic",
         "category": "Journalr",
@@ -156,6 +162,10 @@
         },
         {
           "command": "journalr.topicBrowser.createNote",
+          "when": "false"
+        },
+        {
+          "command": "journalr.topicBrowser.deleteNote",
           "when": "false"
         },
         {
@@ -212,6 +222,10 @@
         },
         {
           "command": "journalr.topicBrowser.copyIdWithTitle",
+          "when": "view == journalr.topicBrowser && viewItem == journalr.article"
+        },
+        {
+          "command": "journalr.topicBrowser.deleteNote",
           "when": "view == journalr.topicBrowser && viewItem == journalr.article"
         },
         {
