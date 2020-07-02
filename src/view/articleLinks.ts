@@ -2,26 +2,26 @@ import * as vscode from "vscode";
 import { DatabaseWatcher, TopicDb, Article } from "../topicdb";
 import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
 
-export enum BacklinkElementType {
+export enum ArticleLinkType {
   Backlink = 1,
   ForwardLink = 2,
   Article = 3,
 }
 
-export class BacklinkElement {
-  constructor(public type: BacklinkElementType, public article?: Article) {
-    if (type === BacklinkElementType.Article && article === undefined) {
+export class ArticleLinkElement {
+  constructor(public type: ArticleLinkType, public article?: Article) {
+    if (type === ArticleLinkType.Article && article === undefined) {
       throw new Error("Invalid backlink element");
     }
   }
 
   toTreeItem(): vscode.TreeItem {
-    if (this.type === BacklinkElementType.Backlink) {
+    if (this.type === ArticleLinkType.Backlink) {
       return {
         label: "Backlinks",
         collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
       };
-    } else if (this.type === BacklinkElementType.ForwardLink) {
+    } else if (this.type === ArticleLinkType.ForwardLink) {
       return {
         label: "Forward Links",
         collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
@@ -44,20 +44,20 @@ export class BacklinkElement {
     };
   }
 
-  static fromArticle(a: Article): BacklinkElement {
-    return new BacklinkElement(BacklinkElementType.Article, a);
+  static fromArticle(a: Article): ArticleLinkElement {
+    return new ArticleLinkElement(ArticleLinkType.Article, a);
   }
 }
 
-const BACKLINK = new BacklinkElement(BacklinkElementType.Backlink);
-const FORWARD_LINK = new BacklinkElement(BacklinkElementType.ForwardLink);
+const BACKLINK = new ArticleLinkElement(ArticleLinkType.Backlink);
+const FORWARD_LINK = new ArticleLinkElement(ArticleLinkType.ForwardLink);
 
-export class BacklinkProvider
-  implements vscode.TreeDataProvider<BacklinkElement> {
+export class ArticleLinkProvider
+  implements vscode.TreeDataProvider<ArticleLinkElement> {
   private _onDidChangeTreeData: vscode.EventEmitter<
-    BacklinkElement | undefined
-  > = new vscode.EventEmitter<BacklinkElement | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<BacklinkElement | undefined> = this
+    ArticleLinkElement | undefined
+  > = new vscode.EventEmitter<ArticleLinkElement | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<ArticleLinkElement | undefined> = this
     ._onDidChangeTreeData.event;
 
   private currentEditor: vscode.TextEditor | undefined;
@@ -82,17 +82,17 @@ export class BacklinkProvider
   }
 
   getTreeItem(
-    element: BacklinkElement
+    element: ArticleLinkElement
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element.toTreeItem();
   }
 
   getChildren(
-    e?: BacklinkElement | undefined
-  ): vscode.ProviderResult<BacklinkElement[]> {
+    e?: ArticleLinkElement | undefined
+  ): vscode.ProviderResult<ArticleLinkElement[]> {
     if (e === undefined) {
       return [BACKLINK, FORWARD_LINK];
-    } else if (e.type === BacklinkElementType.Article) {
+    } else if (e.type === ArticleLinkType.Article) {
       return [];
     }
 
@@ -116,7 +116,7 @@ export class BacklinkProvider
         return [];
       }
 
-      if (e.type === BacklinkElementType.ForwardLink) {
+      if (e.type === ArticleLinkType.ForwardLink) {
         const articles = a
           .getLinks(VSC_FILEREADER)
           .then((links) => {
@@ -127,7 +127,7 @@ export class BacklinkProvider
           ) as Thenable<Article[]>;
 
         return articles.then((articles) =>
-          articles.map((a) => BacklinkElement.fromArticle(a))
+          articles.map((a) => ArticleLinkElement.fromArticle(a))
         );
       }
 
@@ -135,7 +135,7 @@ export class BacklinkProvider
       return this.currentDatabase
         .backLinks(a, VSC_DIRREADER, VSC_FILEREADER)
         .then((articles) =>
-          articles.map((a) => BacklinkElement.fromArticle(a))
+          articles.map((a) => ArticleLinkElement.fromArticle(a))
         );
     });
   }
@@ -144,8 +144,8 @@ export class BacklinkProvider
 export function register(
   context: vscode.ExtensionContext,
   databaseWatcher: DatabaseWatcher
-): BacklinkProvider {
-  const backlinkProvider = new BacklinkProvider(databaseWatcher);
+): ArticleLinkProvider {
+  const backlinkProvider = new ArticleLinkProvider(databaseWatcher);
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
