@@ -56,7 +56,8 @@ export class Topic implements TopicEntry {
     }
 
     // TODO: I'm seeing some weird issues when not using the `readDirectory` function by name
-    const entries = vscode.workspace.fs.readDirectory(this.uri)
+    const entries = vscode.workspace.fs
+      .readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
@@ -165,7 +166,8 @@ export class Article implements TopicEntry {
     }
 
     // TODO: Getting some weird errors when not referring to `readFile` by name
-    const links = vscode.workspace.fs.readFile(this.uri)
+    const links = vscode.workspace.fs
+      .readFile(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens

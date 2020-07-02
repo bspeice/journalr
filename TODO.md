@@ -7,8 +7,6 @@
     else resolve the list of actions. Problem is that expressing error handling is way more
     difficult.
 - Surgical TopicDB invalidation; right now it just triggers a full rescan. Cancellation tokens as well for DB scan operations
-- Quick pick options for "Copy Note ID", "Create Note", and "Open Note"; would be nice quickly
-  access notes when you already remember the title or can remember parts of it.
 - Documentation - [Typedoc](http://typedoc.org/) will likely be the way to go.
 - Add a menu entry for moving a note, but preserving all links. Would've rather handled this as
   "drag and drop", but it appears that VS Code

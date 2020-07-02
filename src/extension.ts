@@ -4,11 +4,10 @@ import { JournalrConfig, WorkspaceConfig } from "./config";
 import * as attachment from "./command/attachment";
 import * as explorer from "./command/explorer";
 import * as journal from "./command/journal";
+import * as palette from "./command/palette";
 import * as topicBrowser from "./command/topic_browser";
 import * as backlinks from "./view/backlinks";
 import * as topicView from "./view/topic";
-import moment = require("moment");
-import { BacklinkProvider } from "./view/backlinks";
 import { WorkspaceWatcher } from "./topicdb";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -21,6 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
   attachment.register(context, configWatcher);
   explorer.register(context, configWatcher);
   journal.register(context, configWatcher);
+  palette.register(context, dbWatcher);
   topicBrowser.register(context, configWatcher, topicProvider);
 }
 

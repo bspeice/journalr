@@ -96,7 +96,7 @@ export function deleteNote(node: TopicEntry): void {
   }
 
   const article = node as Article;
-  vscode.workspace.fs.delete(article.uri, {recursive: false});
+  vscode.workspace.fs.delete(article.uri, { recursive: false });
 }
 
 export async function showArticle(article: Article): Promise<void> {
@@ -144,10 +144,10 @@ export function register(
     vscode.commands.registerCommand(
       "journalr.topicBrowser.deleteNote",
       (node: TopicEntry) => {
-        deleteNote(node)
+        deleteNote(node);
       }
     )
-  )
+  );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "journalr.topicBrowser.createRootTopic",

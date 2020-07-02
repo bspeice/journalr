@@ -92,6 +92,21 @@
         "category": "Journalr"
       },
       {
+        "command": "journalr.palette.copyId",
+        "title": "Copy Note ID",
+        "category": "Journalr"
+      },
+      {
+        "command": "journalr.palette.copyIdWithTitle",
+        "title": "Copy Note ID (with title)",
+        "category": "Journalr"
+      },
+      {
+        "command": "journalr.palette.openNote",
+        "title": "Open Note",
+        "category": "Journalr"
+      },
+      {
         "command": "journalr.topicBrowser.refresh",
         "title": "Refresh Topics",
         "category": "Journalr",
