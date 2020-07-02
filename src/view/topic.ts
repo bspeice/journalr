@@ -61,7 +61,7 @@ export class TopicBrowserProvider
       this.topicDb = topicDb;
     } else {
       for (const topic of this.topicDb.topics) {
-        topic.refresh();
+        topic.invalidate();
       }
     }
     this._onDidChangeTreeData.fire(undefined);

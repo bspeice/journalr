@@ -46,7 +46,7 @@ export class Topic implements TopicEntry {
     return this.uri === this.rootUri;
   }
 
-  refresh() {
+  invalidate() {
     this.entries = undefined;
   }
 
@@ -205,7 +205,7 @@ export class Article implements TopicEntry {
     );
   }
 
-  refresh() {
+  invalidate() {
     this.links = undefined;
   }
 
@@ -315,7 +315,7 @@ export class WorkspaceWatcher implements DatabaseWatcher {
   onDidChange(_uri: vscode.Uri) {
     for (const topic of this.database.topics) {
       // TODO: Finer-grained invalidation
-      topic.refresh();
+      topic.invalidate();
     }
     this.emitter.fire(this.database);
   }
@@ -323,7 +323,7 @@ export class WorkspaceWatcher implements DatabaseWatcher {
   onDidCreate(_uri: vscode.Uri) {
     for (const topic of this.database.topics) {
       // TODO: Finer-grained invalidation
-      topic.refresh();
+      topic.invalidate();
     }
     this.emitter.fire(this.database);
   }
@@ -331,7 +331,7 @@ export class WorkspaceWatcher implements DatabaseWatcher {
   onDidDelete(_uri: vscode.Uri) {
     for (const topic of this.database.topics) {
       // TODO: Finer-grained invalidation
-      topic.refresh();
+      topic.invalidate();
     }
     this.emitter.fire(this.database);
   }
