@@ -14,9 +14,6 @@
   "drag and drop", but it appears that VS Code
   [doesn't currently support this](https://github.com/Microsoft/vscode/issues/32592). This would be
   _incredibly_ complicated to do correctly and is considered low priority.
-- Remember opened topics on restart
-  - [`workspaceState`](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#data-storage)
-    is probably the way to go, but not yet sure how to read the current TreeView state to persist it.
 - Only show first N articles for each topic, and allow people to expand to more. Should be a
   display-only issue; all other commands should operate on all articles/topics.
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for

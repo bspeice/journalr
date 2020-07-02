@@ -25,10 +25,11 @@ async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
   };
 }
 
-function topicToTreeItem(topic: Topic): vscode.TreeItem {
-  const collapsibleState = topic.isRoot()
-    ? vscode.TreeItemCollapsibleState.Expanded
-    : vscode.TreeItemCollapsibleState.Collapsed;
+function topicToTreeItem(
+  topic: Topic,
+  collapseTracker: CollapseTracker
+): vscode.TreeItem {
+  const collapsibleState = collapseTracker.currentState(topic);
   return {
     label: topic.title,
     resourceUri: topic.uri,
@@ -47,7 +48,10 @@ export class TopicBrowserProvider
 
   private topicDb: TopicDb;
 
-  constructor(watcher: DatabaseWatcher) {
+  constructor(
+    watcher: DatabaseWatcher,
+    public collapseTracker: CollapseTracker
+  ) {
     this.topicDb = watcher.currentDb();
     watcher.onRefresh(this.refresh, this);
   }
@@ -71,7 +75,7 @@ export class TopicBrowserProvider
         return articleToTreeItem(element as Article);
 
       case EntryType.Topic:
-        return topicToTreeItem(element as Topic);
+        return topicToTreeItem(element as Topic, this.collapseTracker);
 
       default:
         throw new Error("Unrecognized topic type");
@@ -98,20 +102,87 @@ export class TopicBrowserProvider
     // Articles don't have children
     return [];
   }
+
+  onDidCollapseElement(event: vscode.TreeViewExpansionEvent<TopicEntry>) {
+    const e = event.element;
+    if (e.type !== EntryType.Topic) {
+      return;
+    }
+
+    const topic = e as Topic;
+    this.collapseTracker.collapse(topic);
+  }
+
+  onDidExpandElement(event: vscode.TreeViewExpansionEvent<TopicEntry>) {
+    const e = event.element;
+    if (e.type !== EntryType.Topic) {
+      return;
+    }
+
+    const topic = e as Topic;
+    this.collapseTracker.expand(topic);
+  }
+}
+
+const TOPIC_STATE_KEY = "journalr.topicBrowser.expandedTopics";
+
+export class CollapseTracker {
+  private expanded: Set<string>;
+
+  constructor(private workspaceState: vscode.Memento) {
+    const allItems: string[] = workspaceState.get(TOPIC_STATE_KEY) ?? [];
+    this.expanded = new Set(allItems);
+  }
+
+  private writeState() {
+    // TODO: Is there a better way than create a new array every time?
+    const allExpanded: string[] = [];
+    this.expanded.forEach((v) => allExpanded.push(v));
+    this.workspaceState.update(TOPIC_STATE_KEY, allExpanded);
+  }
+
+  collapse(t: Topic) {
+    this.expanded.delete(t.uri.path);
+    this.writeState();
+  }
+
+  expand(t: Topic) {
+    this.expanded.add(t.uri.path);
+    this.writeState();
+  }
+
+  currentState(t: Topic): vscode.TreeItemCollapsibleState {
+    if (t.uri === t.rootUri) {
+      return vscode.TreeItemCollapsibleState.Expanded;
+    }
+
+    return this.expanded.has(t.uri.path)
+      ? vscode.TreeItemCollapsibleState.Expanded
+      : vscode.TreeItemCollapsibleState.Collapsed;
+  }
 }
 
 export function register(
   context: vscode.ExtensionContext,
   workspaceWatcher: WorkspaceWatcher
 ): TopicBrowserProvider {
-  const topicProvider = new TopicBrowserProvider(workspaceWatcher);
-
-  context.subscriptions.push(
-    vscode.window.registerTreeDataProvider(
-      "journalr.topicBrowser",
-      topicProvider
-    )
+  const collapseTracker = new CollapseTracker(context.workspaceState);
+  const topicProvider = new TopicBrowserProvider(
+    workspaceWatcher,
+    collapseTracker
   );
+  const treeView = vscode.window.createTreeView("journalr.topicBrowser", {
+    treeDataProvider: topicProvider,
+    showCollapseAll: true,
+    canSelectMany: false,
+  });
 
+  treeView.onDidCollapseElement(
+    topicProvider.onDidCollapseElement,
+    topicProvider
+  );
+  treeView.onDidExpandElement(topicProvider.onDidExpandElement, topicProvider);
+
+  context.subscriptions.push(treeView);
   return topicProvider;
 }
