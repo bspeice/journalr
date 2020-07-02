@@ -1,39 +1,61 @@
 import * as vscode from "vscode";
 
-export class JournalrConfig {
-  public attachmentFormat: string;
-  public contextMenuFormat: string;
-  public journalFormats: string[];
-  public ignoreGlobs: string[];
+export interface JournalrConfig {
+  attachmentFormat: string;
+  contextMenuFormat: string;
+  journalFormats: string[];
+  ignoreGlobs: string[];
+}
 
-  public constructor({
-    attachmentFormat,
-    contextMenuFormat,
-    journalFormats,
-    ignoreGlobs,
-  }: {
-    attachmentFormat: string;
-    contextMenuFormat: string;
-    journalFormats: string[];
-    ignoreGlobs: string[];
-  }) {
-    this.attachmentFormat = attachmentFormat;
-    this.contextMenuFormat = contextMenuFormat;
-    this.journalFormats = journalFormats;
-    this.ignoreGlobs = ignoreGlobs;
+function buildConfig(): JournalrConfig {
+  const journalr = vscode.workspace.getConfiguration("journalr");
+  return {
+    attachmentFormat:
+      journalr.get("attachmentFormat") ?? "_attachments/YYYYMMDDhhmmss",
+    contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDD[.md]",
+    journalFormats: journalr.get("journalFormats") ?? [],
+    ignoreGlobs: journalr.get("ignoreGlobs") ?? ["**/.*"],
+  };
+}
+
+export interface ConfigWatcher {
+  onChange: vscode.Event<JournalrConfig>;
+  currentConfig(): JournalrConfig;
+}
+
+const CONFIG_KEYS = [
+  "journalr.attachmentFormat",
+  "journalr.contextMenuFormat",
+  "journalr.journalFormats",
+  "journalr.ignoreGlobs",
+];
+
+export class WorkspaceConfig implements ConfigWatcher {
+  private config: JournalrConfig;
+  private emitter: vscode.EventEmitter<JournalrConfig>;
+
+  public onChange: vscode.Event<JournalrConfig>;
+
+  public constructor() {
+    this.emitter = new vscode.EventEmitter();
+    this.onChange = this.emitter.event;
+
+    this.config = buildConfig();
+
+    vscode.workspace.onDidChangeConfiguration(this.reloadConfig, this);
   }
 
-  public static fromConfig(): JournalrConfig {
-    const journalr = vscode.workspace.getConfiguration("journalr");
+  private reloadConfig(event: vscode.ConfigurationChangeEvent) {
+    for (const conf of CONFIG_KEYS) {
+      if (event.affectsConfiguration(conf)) {
+        this.config = buildConfig();
+        this.emitter.fire(this.config);
+        return;
+      }
+    }
+  }
 
-    const ignore: string[] = journalr.get("ignoreGlobs") ?? ["**/.*"];
-
-    return new JournalrConfig({
-      attachmentFormat:
-        journalr.get("attachmentFormat") ?? "_attachments/YYYYMMDDhhmmss",
-      contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDD.md",
-      journalFormats: journalr.get("journalFormats") ?? [],
-      ignoreGlobs: ignore,
-    });
+  currentConfig(): JournalrConfig {
+    return this.config;
   }
 }

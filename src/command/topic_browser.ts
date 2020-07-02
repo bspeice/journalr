@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 import { TopicEntry, EntryType, Topic, Article, TopicDb } from "../topicdb";
-import { JournalrConfig } from "../config";
+import { JournalrConfig, ConfigWatcher } from "../config";
 import * as utils from "../utils";
+import { TopicBrowserProvider } from "../view/topic";
+import moment = require("moment");
 
 export async function createTopic(node: TopicEntry): Promise<boolean> {
   if (node.type !== EntryType.Topic) {
@@ -91,4 +93,64 @@ export function copyIdWithTitle(node: TopicEntry): void {
 export async function showArticle(article: Article): Promise<void> {
   const doc = await vscode.workspace.openTextDocument(article.uri);
   await vscode.window.showTextDocument(doc);
+}
+
+export function register(
+  context: vscode.ExtensionContext,
+  configWatcher: ConfigWatcher,
+  topicBrowser: TopicBrowserProvider
+) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("journalr.topicBrowser.refresh", () => {
+      // TODO: Is this actually useful?
+      // The workspace watcher should be able to track all the relevant invalidations.
+      topicBrowser.refresh();
+    })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.copyId",
+      (node: TopicEntry) => {
+        copyId(node);
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.copyIdWithTitle",
+      (node: TopicEntry) => {
+        copyIdWithTitle(node);
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.createNote",
+      (node: TopicEntry) => {
+        createNote(node, moment(), configWatcher.currentConfig());
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.createRootTopic",
+      () => {
+        createRootTopic();
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.createTopic",
+      (node: TopicEntry) => {
+        createTopic(node);
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.topicBrowser.showArticle",
+      (article: Article) => showArticle(article)
+    )
+  );
 }

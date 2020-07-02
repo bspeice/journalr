@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
-import { JournalrConfig } from "../config";
+import { JournalrConfig, ConfigWatcher } from "../config";
 import * as utils from "../utils";
 
 export async function createNote(fileUri: vscode.Uri, config: JournalrConfig) {
@@ -23,4 +23,34 @@ export async function copyIdWithTitle(fileUri: vscode.Uri) {
 
   const title = await utils.noteTitle(fileUri);
   vscode.env.clipboard.writeText(`[${title}](/${mdEscape})`);
+}
+
+export function register(
+  context: vscode.ExtensionContext,
+  config: ConfigWatcher
+) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.explorer.createNote",
+      (fileUri: vscode.Uri) => {
+        createNote(fileUri, config.currentConfig());
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.explorer.copyId",
+      (fileUri: vscode.Uri) => {
+        copyId(fileUri);
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.explorer.copyIdWithTitle",
+      (fileUri: vscode.Uri) => {
+        copyIdWithTitle(fileUri);
+      }
+    )
+  );
 }

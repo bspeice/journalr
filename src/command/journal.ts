@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
-import { JournalrConfig } from "../config";
+import { JournalrConfig, ConfigWatcher } from "../config";
 import { createNote, openNote } from "../utils";
 
 export async function createJournal(config: JournalrConfig) {
@@ -30,4 +30,15 @@ export async function createJournal(config: JournalrConfig) {
   const journalUri = vscode.Uri.joinPath(rootUri, formatted);
 
   createNote(journalUri).then(openNote);
+}
+
+export function register(
+  context: vscode.ExtensionContext,
+  config: ConfigWatcher
+) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("journalr.journal.createJournal", () => {
+      createJournal(config.currentConfig());
+    })
+  );
 }

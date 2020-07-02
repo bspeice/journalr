@@ -50,12 +50,13 @@ export class Topic implements TopicEntry {
     this.entries = undefined;
   }
 
-  getEntries(dirReader: DirReader): Thenable<TopicEntry[]> {
+  getEntries(_dirReader: DirReader): Thenable<TopicEntry[]> {
     if (this.entries !== undefined) {
       return this.entries;
     }
 
-    const entries = dirReader(this.uri)
+    // TODO: I'm seeing some weird issues when not using the `readDirectory` function by name
+    const entries = vscode.workspace.fs.readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => _joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !_matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
@@ -158,12 +159,13 @@ export class Article implements TopicEntry {
     this.type = EntryType.Article;
   }
 
-  getLinks(fileReader: FileReader): Thenable<vscode.Uri[]> {
+  getLinks(_fileReader: FileReader): Thenable<vscode.Uri[]> {
     if (this.links !== undefined) {
       return Promise.resolve(this.links);
     }
 
-    const links = fileReader(this.uri)
+    // TODO: Getting some weird errors when not referring to `readFile` by name
+    const links = vscode.workspace.fs.readFile(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
@@ -265,6 +267,8 @@ export class WorkspaceWatcher implements DatabaseWatcher {
   public onRefresh: vscode.Event<TopicDb>;
 
   constructor(config: JournalrConfig) {
+    // TODO: Add/remove workspace folders
+    // TODO: Config updates
     const wsFolders = vscode.workspace.workspaceFolders ?? [];
     const ignore = config.ignoreGlobs;
     const topics = wsFolders.map((f) => {

@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
-import { DatabaseWatcher, Topic, TopicDb, Article } from "../topicdb";
+import {
+  DatabaseWatcher,
+  TopicDb,
+  Article,
+  WorkspaceWatcher,
+} from "../topicdb";
 import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
 
 function articleToTreeItem(a: Article): vscode.TreeItem {
@@ -66,4 +71,20 @@ export class BacklinkProvider implements vscode.TreeDataProvider<Article> {
         : []
     );
   }
+}
+
+export function register(
+  context: vscode.ExtensionContext,
+  workspaceWatcher: WorkspaceWatcher
+): BacklinkProvider {
+  const backlinkProvider = new BacklinkProvider(workspaceWatcher);
+
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(
+      "journalr.backlinks",
+      backlinkProvider
+    )
+  );
+
+  return backlinkProvider;
 }

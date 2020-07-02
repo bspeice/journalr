@@ -1,22 +1,37 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
-import { JournalrConfig } from "../config";
+import { JournalrConfig, ConfigWatcher } from "../config";
 
-async function _importAttachments(
+async function importAttachments(
   config: JournalrConfig,
   now: moment.Moment,
-  attachmentRoot: vscode.Uri,
-  attachmentUris: vscode.Uri[]
-): Promise<string[]> {
+  formatter: (name: string, index: number) => string
+): Promise<void> {
+  const wsFolders = vscode.workspace.workspaceFolders;
+  if (!wsFolders) {
+    return;
+  }
+  const attachmentRoot = wsFolders[0].uri;
+
+  const uris = await vscode.window.showOpenDialog({ canSelectMany: true });
+  if (!uris) {
+    return;
+  }
+
+  const activeEditor = vscode.window.activeTextEditor;
+  if (activeEditor === undefined) {
+    return;
+  }
+
   var attachmentNames = [];
-  for (const [i, fileUri] of attachmentUris.entries()) {
+  for (const [i, fileUri] of uris.entries()) {
     const extensionSplit = fileUri.fsPath.split(".");
     const extension =
       extensionSplit.length > 1
         ? `.${extensionSplit[extensionSplit.length - 1]}`
         : ``;
 
-    const tag = attachmentUris.length !== 1 ? `_${i}` : "";
+    const tag = uris.length !== 1 ? `_${i}` : "";
     const attachmentName = now.format(
       `${config.attachmentFormat}[${tag}${extension}]`
     );
@@ -26,61 +41,42 @@ async function _importAttachments(
     attachmentNames.push(attachmentName);
   }
 
-  return attachmentNames;
+  const snippetString = attachmentNames
+    .map((name, index) => formatter(name, index))
+    .join("\n\n");
+  const snippet = new vscode.SnippetString(snippetString);
+  await activeEditor.insertSnippet(snippet);
+
+  return;
 }
 
-async function importAttachments(
-  config?: JournalrConfig,
-  now?: moment.Moment,
-  attachmentRoot?: vscode.Uri,
-  attachmentUris?: vscode.Uri[]
-): Promise<string[]> {
-  if (!attachmentRoot) {
-    const wsFolders = vscode.workspace.workspaceFolders;
-    if (!wsFolders) {
-      return [];
-    }
-
-    attachmentRoot = wsFolders[0].uri;
-  }
-
-  if (!attachmentUris) {
-    const uris = await vscode.window.showOpenDialog({ canSelectMany: true });
-    if (!uris) {
-      return [];
-    }
-
-    attachmentUris = uris;
-  }
-
-  config = config ?? JournalrConfig.fromConfig();
-  now = now ?? moment();
-
-  return await _importAttachments(config, now, attachmentRoot, attachmentUris);
+function formatAttachment(name: string, index: number) {
+  return `[$${index + 1}](/${name})`;
 }
 
-async function importFormattedAttachment(
-  nameFunc: (name: string, index: number) => string
+function formatImage(name: string, index: number) {
+  return `![$${index + 1}](/${name})`;
+}
+
+export function register(
+  context: vscode.ExtensionContext,
+  configWatcher: ConfigWatcher
 ) {
-  const attachmentNames = await importAttachments();
-  if (!attachmentNames) {
-    return;
-  }
-
-  const activeEditor = vscode.window.activeTextEditor;
-  if (!activeEditor) {
-    return;
-  }
-
-  const snippetText = attachmentNames.map(nameFunc).join(", ");
-  const snippet = new vscode.SnippetString(snippetText);
-  return activeEditor.insertSnippet(snippet);
-}
-
-export async function insertAttachment() {
-  return await importFormattedAttachment((n, i) => `[$${i + 1}](/${n})`);
-}
-
-export async function insertImage() {
-  return await importFormattedAttachment((n, i) => `![$${i + 1}](/${n})`);
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "journalr.attachment.insertAttachment",
+      () => {
+        importAttachments(
+          configWatcher.currentConfig(),
+          moment(),
+          formatAttachment
+        );
+      }
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("journalr.attachment.insertImage", () => {
+      importAttachments(configWatcher.currentConfig(), moment(), formatImage);
+    })
+  );
 }

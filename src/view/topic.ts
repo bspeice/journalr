@@ -6,6 +6,7 @@ import {
   Topic,
   Article,
   DatabaseWatcher,
+  WorkspaceWatcher,
 } from "../topicdb";
 import { VSC_DIRREADER } from "../types";
 
@@ -93,4 +94,20 @@ export class TopicBrowserProvider
     // Articles don't have children
     return [];
   }
+}
+
+export function register(
+  context: vscode.ExtensionContext,
+  workspaceWatcher: WorkspaceWatcher
+): TopicBrowserProvider {
+  const topicProvider = new TopicBrowserProvider(workspaceWatcher);
+
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(
+      "journalr.topicBrowser",
+      topicProvider
+    )
+  );
+
+  return topicProvider;
 }
