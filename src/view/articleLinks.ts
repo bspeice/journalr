@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { DatabaseWatcher, TopicDb, Article, EntryType } from "../topicdb";
+import { DatabaseWatcher, TopicDb, EntryType, Article } from "../topicdb";
 import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
 
 export enum ArticleLinkType {

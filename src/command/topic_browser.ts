@@ -1,9 +1,8 @@
+import * as moment from 'moment';
 import * as vscode from "vscode";
-import { TopicEntry, EntryType, Topic, Article, TopicDb } from "../topicdb";
-import { JournalrConfig, ConfigWatcher } from "../config";
 import * as utils from "../utils";
-import { TopicBrowserProvider } from "../view/topic";
-import moment = require("moment");
+import { TopicEntry, EntryType, Topic, Article } from "../topicdb";
+import { JournalrConfig, ConfigWatcher } from "../config";
 
 export async function createTopic(node: TopicEntry): Promise<boolean> {
   if (node.type !== EntryType.Topic) {

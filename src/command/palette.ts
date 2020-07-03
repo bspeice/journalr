@@ -1,8 +1,8 @@
+import * as moment from "moment";
 import * as vscode from "vscode";
-import { DatabaseWatcher, Article, TopicDb, Topic } from "../topicdb";
+import { DatabaseWatcher, TopicDb, Article, Topic } from "../topicdb";
 import { VSC_DIRREADER } from "../types";
 import { encodeUriMd } from "../utils";
-import * as moment from "moment";
 import { JournalrConfig, ConfigWatcher } from "../config";
 
 function articleToDisplayItem(a: Article): string {

@@ -3,10 +3,10 @@ import {
   TopicDb,
   TopicEntry,
   EntryType,
-  Topic,
-  Article,
   DatabaseWatcher,
   WorkspaceWatcher,
+  Article,
+  Topic,
 } from "../topicdb";
 import { VSC_DIRREADER } from "../types";
 
