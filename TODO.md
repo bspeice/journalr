@@ -24,3 +24,7 @@
 - Duplicate links detector? Would be cool to have some help "refactoring" links so that you can tie articles together.
 - If the active text editor changes to an article in the database, the topic view should focus it
 - Allow linking to topics, and displaying those in the topic browser?
+  - Some form of table-of-contents?
+- Display first N articles
+  - Maybe with a "..." tree item that shows the next N articles?
+  - Purpose is to have topics like "Journal" that will potentially contain hundreds of entries, but not all need to be displayed.
