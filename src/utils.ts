@@ -16,26 +16,6 @@ export function dirname(uri: vscode.Uri): vscode.Uri {
   return vscode.Uri.file(uri.path.split("/").slice(0, -1).join("/"));
 }
 
-export async function noteTitle(
-  fileUri: vscode.Uri
-): Promise<string | undefined> {
-  var doc;
-  try {
-    doc = await vscode.workspace.openTextDocument(fileUri);
-  } catch (e) {}
-  if (doc === undefined) {
-    return undefined;
-  }
-
-  // If the document contains a `# ` as the first line, treat that as the title.
-  // Otherwise, just use the `basename`
-  const start = new vscode.Position(0, 0);
-  const end = start.with({ line: 0, character: 2 });
-  const range = new vscode.Range(start, end);
-
-  return doc.getText(range) === "# " ? doc.lineAt(0).text.slice(2) : undefined;
-}
-
 export function encodeUriMd(uri: vscode.Uri | string): string {
   return uri.toString().replace(/ /g, "%20");
 }

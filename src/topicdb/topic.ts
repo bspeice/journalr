@@ -1,7 +1,7 @@
 import * as minimatch from 'minimatch';
 import * as vscode from 'vscode';
 import { TopicEntry, EntryType } from ".";
-import { DirReader } from '../types';
+import { DirReader, FileReader, Stat } from '../types';
 import { Article } from './article';
 
 function matches(pattern: vscode.Uri, globs: string[]): boolean {
@@ -39,7 +39,7 @@ export class Topic implements TopicEntry {
     this.entries = undefined;
   }
 
-  getEntries(dirReader: DirReader): Thenable<TopicEntry[]> {
+  getEntries(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<TopicEntry[]> {
     if (this.entries !== undefined) {
       return this.entries;
     }
@@ -51,7 +51,7 @@ export class Topic implements TopicEntry {
       .then((dirEntries) => {
         const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(uri, this.rootUri))
+          .map(([, uri]) => Article.fromUri(fileReader, stat, uri, this.rootUri))
           .reverse();
 
         const topics = dirEntries
@@ -70,7 +70,7 @@ export class Topic implements TopicEntry {
     return entries;
   }
 
-  findEntry(dirReader: DirReader, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(fileReader: FileReader, dirReader: DirReader, stat: Stat, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
     // First, check if it's possible for us to contain this entry
     const thisPathComponents = this.uri.fsPath.split('/');
     const thatPathComponents = uri.fsPath.split('/').slice(0, thisPathComponents.length);
@@ -87,7 +87,7 @@ export class Topic implements TopicEntry {
 
     // For all our entries, if there's a match, return immediately. Otherwise, allow topics
     // to recurse.
-    return this.getEntries(dirReader)
+    return this.getEntries(fileReader, dirReader, stat)
     .then((entries) => {
       const toScan = [];
       for (const entry of entries) {
@@ -102,7 +102,7 @@ export class Topic implements TopicEntry {
             return e;
           }
 
-          toScan.push(e.findEntry(dirReader, uri))
+          toScan.push(e.findEntry(fileReader, dirReader, stat, uri))
         }
       }
 
@@ -119,8 +119,8 @@ export class Topic implements TopicEntry {
     });
   }
 
-  recurseArticles(dirReader: DirReader): Thenable<Article[]> {
-    const entries = this.getEntries(dirReader);
+  recurseArticles(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Article[]> {
+    const entries = this.getEntries(fileReader, dirReader, stat);
 
     const articles = entries.then((entries) =>
       entries.filter((e) => e.type === EntryType.Article)
@@ -131,7 +131,7 @@ export class Topic implements TopicEntry {
 
     const topicArticles = topics
       .then((topics) => {
-        return Promise.all(topics.map((t) => t.recurseArticles(dirReader)));
+        return Promise.all(topics.map((t) => t.recurseArticles(fileReader, dirReader, stat)));
       })
       .then((articles) =>
         articles.reduce((acc, a) => acc.concat(a), [])
@@ -143,14 +143,14 @@ export class Topic implements TopicEntry {
     ]).then(([topicArticles, articles]) => topicArticles.concat(articles));
   }
 
-  recurseTopics(dirReader: DirReader): Thenable<Topic[]> {
-    return this.getEntries(dirReader)
+  recurseTopics(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Topic[]> {
+    return this.getEntries(fileReader, dirReader, stat)
       .then((e) => e.filter((e) => e.type === EntryType.Topic) as Topic[])
       .then((topics) => {
         const allTopics = [];
         for (const topic of topics) {
           allTopics.push(Promise.resolve([topic]));
-          allTopics.push(topic.recurseTopics(dirReader));
+          allTopics.push(topic.recurseTopics(fileReader, dirReader, stat));
         }
         return Promise.all(allTopics);
       })

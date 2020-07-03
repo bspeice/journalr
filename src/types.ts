@@ -9,3 +9,7 @@ export type DirReader = (
 ) => Thenable<[string, vscode.FileType][]>;
 
 export const VSC_DIRREADER: DirReader = (uri: vscode.Uri) => { return vscode.workspace.fs.readDirectory(uri) };
+
+export type Stat = (uri: vscode.Uri) => Thenable<vscode.FileStat>;
+
+export const VSC_STAT: Stat = (uri: vscode.Uri) => { return vscode.workspace.fs.stat(uri) };

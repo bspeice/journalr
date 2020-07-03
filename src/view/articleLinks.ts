@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { DatabaseWatcher, TopicDb, EntryType, Article } from "../topicdb";
-import { VSC_DIRREADER, VSC_FILEREADER } from "../types";
+import { VSC_DIRREADER, VSC_FILEREADER, VSC_STAT } from "../types";
 
 export enum ArticleLinkType {
   Backlink = 1,
@@ -101,7 +101,7 @@ export class ArticleLinkProvider
     }
 
     const currentUri = this.currentEditor.document.uri;
-    const currentArticle = this.currentDatabase.findEntry(VSC_DIRREADER, currentUri)
+    const currentArticle = this.currentDatabase.findEntry(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT, currentUri)
     .then((e) => {
       if (e !== undefined && e.type === EntryType.Article) {
         return e as Article;
@@ -119,7 +119,7 @@ export class ArticleLinkProvider
         const articles = a
           .getLinks(VSC_FILEREADER)
           .then((links) => {
-            return Promise.all(links.map((l) => Article.fromUri(l, a.rootUri)));
+            return Promise.all(links.map((l) => Article.fromUri(VSC_FILEREADER, VSC_STAT, l, a.rootUri)));
           })
           .then((articles) =>
             articles.filter((a) => a !== undefined)
@@ -132,7 +132,7 @@ export class ArticleLinkProvider
 
       // Backlinks
       return this.currentDatabase
-        .backLinks(a, VSC_DIRREADER, VSC_FILEREADER)
+        .backLinks(a, VSC_DIRREADER, VSC_FILEREADER, VSC_STAT)
         .then((articles) =>
           articles.map((a) => ArticleLinkElement.fromArticle(a))
         );

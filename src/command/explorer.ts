@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 import * as moment from "moment";
-import { JournalrConfig, ConfigWatcher } from "../config";
 import * as utils from "../utils";
+import { readMdTitle } from "../topicdb/article";
+import { JournalrConfig, ConfigWatcher } from "../config";
+import { VSC_FILEREADER } from "../types";
 
 export async function createNote(fileUri: vscode.Uri, config: JournalrConfig) {
   const formatted = moment().format(config.contextMenuFormat);
@@ -21,7 +23,7 @@ export async function copyIdWithTitle(fileUri: vscode.Uri) {
   const relpath = vscode.workspace.asRelativePath(fileUri);
   const mdEscape = utils.encodeUriMd(relpath);
 
-  const title = await utils.noteTitle(fileUri);
+  const title = await readMdTitle(VSC_FILEREADER, fileUri);
   vscode.env.clipboard.writeText(`[${title}](/${mdEscape})`);
 }
 

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as utils from "../utils";
 import { JournalrConfig } from "../config";
-import { FileReader, DirReader } from "../types";
+import { FileReader, DirReader, Stat } from "../types";
 import { Article } from "./article";
 import { Topic } from "./topic";
 
@@ -25,9 +25,9 @@ function zippedLinks(fileReader: FileReader, article: Article): Thenable<[Articl
 export class TopicDb {
   constructor(public topics: Topic[]) {}
 
-  allArticles(dirReader: DirReader): Thenable<Article[]> {
+  allArticles(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Article[]> {
     const articlesPromises = this.topics.map((t) =>
-      t.recurseArticles(dirReader)
+      t.recurseArticles(fileReader, dirReader, stat)
     );
     const allArticles = Promise.all(articlesPromises);
 
@@ -36,11 +36,11 @@ export class TopicDb {
     );
   }
 
-  findEntry(dirReader: DirReader, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(fileReader: FileReader, dirReader: DirReader, stat: Stat, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
     // TODO: More efficient way to handle this besides resolving all promises?
     // We only care about the first match. That said, early returns from topics
     // that know they can't have the element maybe make this less problematic?
-    return Promise.all(this.topics.map((t) => t.findEntry(dirReader, uri)))
+    return Promise.all(this.topics.map((t) => t.findEntry(fileReader, dirReader, stat, uri)))
     .then((matches) => {
       for (const match of matches) {
         if (match !== undefined) {
@@ -52,9 +52,9 @@ export class TopicDb {
     })
   }
 
-  allTopics(dirReader: DirReader): Thenable<Topic[]> {
+  allTopics(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Topic[]> {
     const topicPromises = this.topics.map((t) => {
-      return t.recurseTopics(dirReader);
+      return t.recurseTopics(fileReader, dirReader, stat);
     });
     const allTopics = Promise.all(topicPromises);
 
@@ -65,9 +65,10 @@ export class TopicDb {
   backLinks(
     needle: Article,
     dirReader: DirReader,
-    fileReader: FileReader
+    fileReader: FileReader,
+    stat: Stat,
   ): Thenable<Article[]> {
-    const haystack = this.allArticles(dirReader)
+    const haystack = this.allArticles(fileReader, dirReader, stat)
       .then((articles) =>
         Promise.all(articles.map((a) => zippedLinks(fileReader, a)))
       )

@@ -2,7 +2,7 @@ import * as marked from 'marked';
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 import { TopicEntry, EntryType } from ".";
-import { FileReader } from '../types';
+import { FileReader, Stat } from '../types';
 
 function getLinks(t: marked.Token): string[] {
   var links = [];
@@ -35,9 +35,23 @@ function isArticleLink(l: string | null): boolean {
   return true;
 }
 
+export function readMdTitle(fileReader: FileReader, uri: vscode.Uri): Thenable<string> {
+  // If the document contains a `# ` as the first characters, treat that as the title.
+  // Otherwise, just use the `basename`.
+  return fileReader(uri).then((content) => {
+      if (content.length > 2 && content.slice(0, 2).toString() === "# ") {
+        const lineEnd = content.findIndex((c) => c === '\n'.charCodeAt(0));
+        return content.slice(2, lineEnd).toString();
+      }
+
+      const bname = uri.fsPath.split('/').reverse()[0];
+      return bname.split('.').slice(0, -1).join('.');
+  })
+}
+
 export class Article implements TopicEntry {
   public type: EntryType;
-  // NOTE: We don't care about tracking external links here, this is only for internal article links.
+  // NOTE: We don't care about tracking remote links here, this is only for internal article links.
   private links: Thenable<vscode.Uri[]> | undefined;
 
   constructor(
@@ -86,20 +100,33 @@ export class Article implements TopicEntry {
   }
 
   static fromUri(
+    fileReader: FileReader,
+    stat: Stat,
     uri: vscode.Uri,
     rootUri: vscode.Uri
   ): Thenable<Article | undefined> {
-    const extension = uri.path.split(".").reverse()[0];
-    if (!utils.MD_EXTENSIONS.includes(extension)) {
-      return Promise.resolve(undefined);
-    }
+    const isFile = stat(uri)
+    .then((s) => s.type === vscode.FileType.File);
 
-    return utils.noteTitle(uri).then((name) => {
-      if (name === undefined) {
-        return undefined;
-      }
+    const title = isFile.then((isFile) => {
+        if (!isFile) {
+            return undefined;
+        }
 
-      return new Article(name, uri, rootUri);
+        const extension = uri.path.split(".").reverse()[0];
+        if (!utils.MD_EXTENSIONS.includes(extension)) {
+            return undefined;
+        }
+
+        return readMdTitle(fileReader, uri);
     });
+
+    return title.then((title) => {
+        if (title === undefined) {
+            return undefined;
+        }
+
+        return new Article(title, uri, rootUri);
+    })
   }
 }
