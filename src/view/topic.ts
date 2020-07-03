@@ -8,7 +8,6 @@ import {
   Article,
   Topic,
 } from "../topicdb";
-import { VSC_DIRREADER, VSC_STAT, VSC_FILEREADER } from "../types";
 
 async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
   return {
@@ -88,7 +87,7 @@ export class TopicBrowserProvider
     if (element === undefined) {
       const topics = this.topicDb.topics;
       if (topics.length === 1) {
-        return this.topicDb.topics[0].getEntries(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT);
+        return this.topicDb.topics[0].getEntries(vscode.workspace.fs);
       }
 
       return topics;
@@ -96,7 +95,7 @@ export class TopicBrowserProvider
 
     if (element.type === EntryType.Topic) {
       const e = element as Topic;
-      return e.getEntries(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT);
+      return e.getEntries(vscode.workspace.fs);
     }
 
     // Articles don't have children

@@ -1,7 +1,6 @@
 import * as moment from "moment";
 import * as vscode from "vscode";
 import { DatabaseWatcher, TopicDb, Article, Topic } from "../topicdb";
-import { VSC_DIRREADER, VSC_STAT, VSC_FILEREADER } from "../types";
 import { encodeUriMd } from "../utils";
 import { JournalrConfig, ConfigWatcher } from "../config";
 
@@ -45,7 +44,7 @@ async function translatedPick<T>(
 
 export async function copyNoteId(database: TopicDb) {
   const articlePick = await translatedPick(
-    database.allArticles(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT),
+    database.allArticles(vscode.workspace.fs),
     articleToDisplayItem
   );
 
@@ -59,7 +58,7 @@ export async function copyNoteId(database: TopicDb) {
 
 export async function copyNoteIdWithTitle(database: TopicDb) {
   const articlePick = await translatedPick(
-    database.allArticles(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT),
+    database.allArticles(vscode.workspace.fs),
     articleToDisplayItem
   );
   if (articlePick === undefined) {
@@ -78,7 +77,7 @@ export async function createNote(
   now: moment.Moment
 ) {
   const topicPick = await translatedPick(
-    database.allTopics(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT),
+    database.allTopics(vscode.workspace.fs),
     topicToDisplayItem
   );
   if (topicPick === undefined) {
@@ -95,7 +94,7 @@ export async function createNote(
 
 export async function openNote(database: TopicDb) {
   const articlePick = await translatedPick(
-    database.allArticles(VSC_FILEREADER, VSC_DIRREADER, VSC_STAT),
+    database.allArticles(vscode.workspace.fs),
     articleToDisplayItem
   );
   if (articlePick === undefined) {

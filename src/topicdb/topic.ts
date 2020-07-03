@@ -1,7 +1,6 @@
 import * as minimatch from 'minimatch';
 import * as vscode from 'vscode';
 import { TopicEntry, EntryType } from ".";
-import { DirReader, FileReader, Stat } from '../types';
 import { Article } from './article';
 
 function matches(pattern: vscode.Uri, globs: string[]): boolean {
@@ -39,19 +38,19 @@ export class Topic implements TopicEntry {
     this.entries = undefined;
   }
 
-  getEntries(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<TopicEntry[]> {
+  getEntries(fs: vscode.FileSystem): Thenable<TopicEntry[]> {
     if (this.entries !== undefined) {
       return this.entries;
     }
 
     // TODO: I'm seeing some weird issues when not using the `readDirectory` function by name
-    const entries = dirReader(this.uri)
+    const entries = fs.readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
         const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(fileReader, stat, uri, this.rootUri))
+          .map(([, uri]) => Article.fromUri(fs, uri, this.rootUri))
           .reverse();
 
         const topics = dirEntries
@@ -70,7 +69,7 @@ export class Topic implements TopicEntry {
     return entries;
   }
 
-  findEntry(fileReader: FileReader, dirReader: DirReader, stat: Stat, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
     // First, check if it's possible for us to contain this entry
     const thisPathComponents = this.uri.fsPath.split('/');
     const thatPathComponents = uri.fsPath.split('/').slice(0, thisPathComponents.length);
@@ -87,7 +86,7 @@ export class Topic implements TopicEntry {
 
     // For all our entries, if there's a match, return immediately. Otherwise, allow topics
     // to recurse.
-    return this.getEntries(fileReader, dirReader, stat)
+    return this.getEntries(fs)
     .then((entries) => {
       const toScan = [];
       for (const entry of entries) {
@@ -102,7 +101,7 @@ export class Topic implements TopicEntry {
             return e;
           }
 
-          toScan.push(e.findEntry(fileReader, dirReader, stat, uri))
+          toScan.push(e.findEntry(fs, uri))
         }
       }
 
@@ -119,8 +118,8 @@ export class Topic implements TopicEntry {
     });
   }
 
-  recurseArticles(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Article[]> {
-    const entries = this.getEntries(fileReader, dirReader, stat);
+  recurseArticles(fs: vscode.FileSystem): Thenable<Article[]> {
+    const entries = this.getEntries(fs);
 
     const articles = entries.then((entries) =>
       entries.filter((e) => e.type === EntryType.Article)
@@ -131,7 +130,7 @@ export class Topic implements TopicEntry {
 
     const topicArticles = topics
       .then((topics) => {
-        return Promise.all(topics.map((t) => t.recurseArticles(fileReader, dirReader, stat)));
+        return Promise.all(topics.map((t) => t.recurseArticles(fs)));
       })
       .then((articles) =>
         articles.reduce((acc, a) => acc.concat(a), [])
@@ -143,14 +142,14 @@ export class Topic implements TopicEntry {
     ]).then(([topicArticles, articles]) => topicArticles.concat(articles));
   }
 
-  recurseTopics(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Topic[]> {
-    return this.getEntries(fileReader, dirReader, stat)
+  recurseTopics(fs: vscode.FileSystem): Thenable<Topic[]> {
+    return this.getEntries(fs)
       .then((e) => e.filter((e) => e.type === EntryType.Topic) as Topic[])
       .then((topics) => {
         const allTopics = [];
         for (const topic of topics) {
           allTopics.push(Promise.resolve([topic]));
-          allTopics.push(topic.recurseTopics(fileReader, dirReader, stat));
+          allTopics.push(topic.recurseTopics(fs));
         }
         return Promise.all(allTopics);
       })

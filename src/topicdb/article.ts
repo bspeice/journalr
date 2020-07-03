@@ -2,7 +2,6 @@ import * as marked from 'marked';
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 import { TopicEntry, EntryType } from ".";
-import { FileReader, Stat } from '../types';
 
 function getLinks(t: marked.Token): string[] {
   var links = [];
@@ -35,10 +34,10 @@ function isArticleLink(l: string | null): boolean {
   return true;
 }
 
-export function readMdTitle(fileReader: FileReader, uri: vscode.Uri): Thenable<string> {
+export function readMdTitle(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<string> {
   // If the document contains a `# ` as the first characters, treat that as the title.
   // Otherwise, just use the `basename`.
-  return fileReader(uri).then((content) => {
+  return fs.readFile(uri).then((content) => {
       if (content.length > 2 && content.slice(0, 2).toString() === "# ") {
         const lineEnd = content.findIndex((c) => c === '\n'.charCodeAt(0));
         return content.slice(2, lineEnd).toString();
@@ -62,13 +61,13 @@ export class Article implements TopicEntry {
     this.type = EntryType.Article;
   }
 
-  getLinks(fileReader: FileReader): Thenable<vscode.Uri[]> {
+  getLinks(fs: vscode.FileSystem): Thenable<vscode.Uri[]> {
     if (this.links !== undefined) {
       return Promise.resolve(this.links);
     }
 
     // TODO: Getting some weird errors when not referring to `readFile` by name
-    const links = fileReader(this.uri)
+    const links = fs.readFile(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
@@ -100,12 +99,11 @@ export class Article implements TopicEntry {
   }
 
   static fromUri(
-    fileReader: FileReader,
-    stat: Stat,
+    fs: vscode.FileSystem,
     uri: vscode.Uri,
     rootUri: vscode.Uri
   ): Thenable<Article | undefined> {
-    const isFile = stat(uri)
+    const isFile = fs.stat(uri)
     .then((s) => s.type === vscode.FileType.File);
 
     const title = isFile.then((isFile) => {
@@ -118,7 +116,7 @@ export class Article implements TopicEntry {
             return undefined;
         }
 
-        return readMdTitle(fileReader, uri);
+        return readMdTitle(fs, uri);
     });
 
     return title.then((title) => {

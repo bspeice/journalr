@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import * as utils from "../utils";
 import { JournalrConfig } from "../config";
-import { FileReader, DirReader, Stat } from "../types";
 import { Article } from "./article";
 import { Topic } from "./topic";
 
@@ -16,8 +15,8 @@ export interface TopicEntry {
   type: EntryType;
 }
 
-function zippedLinks(fileReader: FileReader, article: Article): Thenable<[Article, vscode.Uri][]> {
-  return article.getLinks(fileReader).then((links) =>
+function zippedLinks(fs: vscode.FileSystem, article: Article): Thenable<[Article, vscode.Uri][]> {
+  return article.getLinks(fs).then((links) =>
     links.map((l) => [article, l])
   );
 }
@@ -25,9 +24,9 @@ function zippedLinks(fileReader: FileReader, article: Article): Thenable<[Articl
 export class TopicDb {
   constructor(public topics: Topic[]) {}
 
-  allArticles(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Article[]> {
+  allArticles(fs: vscode.FileSystem): Thenable<Article[]> {
     const articlesPromises = this.topics.map((t) =>
-      t.recurseArticles(fileReader, dirReader, stat)
+      t.recurseArticles(fs)
     );
     const allArticles = Promise.all(articlesPromises);
 
@@ -36,11 +35,11 @@ export class TopicDb {
     );
   }
 
-  findEntry(fileReader: FileReader, dirReader: DirReader, stat: Stat, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
     // TODO: More efficient way to handle this besides resolving all promises?
     // We only care about the first match. That said, early returns from topics
     // that know they can't have the element maybe make this less problematic?
-    return Promise.all(this.topics.map((t) => t.findEntry(fileReader, dirReader, stat, uri)))
+    return Promise.all(this.topics.map((t) => t.findEntry(fs, uri)))
     .then((matches) => {
       for (const match of matches) {
         if (match !== undefined) {
@@ -52,9 +51,9 @@ export class TopicDb {
     })
   }
 
-  allTopics(fileReader: FileReader, dirReader: DirReader, stat: Stat): Thenable<Topic[]> {
+  allTopics(fs: vscode.FileSystem): Thenable<Topic[]> {
     const topicPromises = this.topics.map((t) => {
-      return t.recurseTopics(fileReader, dirReader, stat);
+      return t.recurseTopics(fs);
     });
     const allTopics = Promise.all(topicPromises);
 
@@ -63,14 +62,12 @@ export class TopicDb {
   }
 
   backLinks(
+    fs: vscode.FileSystem,
     needle: Article,
-    dirReader: DirReader,
-    fileReader: FileReader,
-    stat: Stat,
   ): Thenable<Article[]> {
-    const haystack = this.allArticles(fileReader, dirReader, stat)
+    const haystack = this.allArticles(fs)
       .then((articles) =>
-        Promise.all(articles.map((a) => zippedLinks(fileReader, a)))
+        Promise.all(articles.map((a) => zippedLinks(fs, a)))
       )
       .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
 
