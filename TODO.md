@@ -20,5 +20,5 @@
 - Refresh topicBrowser on creating a new-subtopic; the URI doesn't match anything yet, but it does need to be re-scanned.
 - Some sort of warning for things that *look* like internal links, but can't be resolved? Broken links detector?
 - Maybe base everything on `uri.fsPath` instead of full URI?
-- Allow filenames as note titles; don't want to exclude MD files based on not having a title.
 - Compute back/forward links even if the item isn't in the DB?
+- Duplicate links detector? Would be cool to have some help "refactoring" links so that you can tie articles together.
