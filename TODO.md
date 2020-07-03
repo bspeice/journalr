@@ -23,3 +23,4 @@
 - Compute back/forward links even if the item isn't in the DB?
 - Duplicate links detector? Would be cool to have some help "refactoring" links so that you can tie articles together.
 - If the active text editor changes to an article in the database, the topic view should focus it
+- Allow linking to topics, and displaying those in the topic browser?
