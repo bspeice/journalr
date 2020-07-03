@@ -2,6 +2,7 @@ import * as marked from 'marked';
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 import { TopicEntry, EntryType } from ".";
+import { relative } from 'path';
 
 function getLinks(t: marked.Token): string[] {
   var links = [];
@@ -34,7 +35,7 @@ function isArticleLink(l: string | null): boolean {
   return true;
 }
 
-export function readMdTitle(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<string> {
+export function readMdTitle(fs: vscode.FileSystem, uri: vscode.Uri, uriRoot: vscode.Uri): Thenable<string> {
   // If the document contains a `# ` as the first characters, treat that as the title.
   // Otherwise, just use the `basename`.
   return fs.readFile(uri).then((content) => {
@@ -43,15 +44,13 @@ export function readMdTitle(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<st
         return content.slice(2, lineEnd).toString();
       }
 
-      const bname = uri.fsPath.split('/').reverse()[0];
-      return bname.split('.').slice(0, -1).join('.');
+      return relative(uriRoot.fsPath, uri.fsPath);
   })
 }
 
 export class Article implements TopicEntry {
   public type: EntryType;
-  // NOTE: We don't care about tracking remote links here, this is only for internal article links.
-  private links: Thenable<vscode.Uri[]> | undefined;
+  private articleLinks: Thenable<vscode.Uri[]> | undefined;
 
   constructor(
     public title: string,
@@ -62,11 +61,10 @@ export class Article implements TopicEntry {
   }
 
   getLinks(fs: vscode.FileSystem): Thenable<vscode.Uri[]> {
-    if (this.links !== undefined) {
-      return Promise.resolve(this.links);
+    if (this.articleLinks !== undefined) {
+      return Promise.resolve(this.articleLinks);
     }
 
-    // TODO: Getting some weird errors when not referring to `readFile` by name
     const links = fs.readFile(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
@@ -82,6 +80,7 @@ export class Article implements TopicEntry {
 
         const toUri = (l: string): vscode.Uri => {
           const decoded = decodeURI(l);
+          // NOTE: This assumes the decoded link is absolute.
           return vscode.Uri.joinPath(this.rootUri, decoded);
         };
         return inlineLinks.concat(freestandingLinks).map(toUri);
@@ -90,12 +89,12 @@ export class Article implements TopicEntry {
       vscode.Uri[]
     >;
 
-    this.links = links;
+    this.articleLinks = links;
     return links;
   }
 
   invalidate() {
-    this.links = undefined;
+    this.articleLinks = undefined;
   }
 
   static fromUri(
@@ -116,7 +115,7 @@ export class Article implements TopicEntry {
             return undefined;
         }
 
-        return readMdTitle(fs, uri);
+        return readMdTitle(fs, uri, rootUri);
     });
 
     return title.then((title) => {

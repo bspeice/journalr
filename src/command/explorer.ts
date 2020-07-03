@@ -19,10 +19,17 @@ export async function copyId(fileUri: vscode.Uri) {
 }
 
 export async function copyIdWithTitle(fileUri: vscode.Uri) {
+  const wsFolders = vscode.workspace.workspaceFolders ?? [];
+  if (wsFolders.length == 0) {
+    await vscode.window.showInformationMessage("Unable to find workspace folders");
+    return;
+  }
+
+  const wsRoot = wsFolders[0];
   const relpath = vscode.workspace.asRelativePath(fileUri);
   const mdEscape = utils.encodeUriMd(relpath);
 
-  const title = await readMdTitle(vscode.workspace.fs, fileUri);
+  const title = await readMdTitle(vscode.workspace.fs, fileUri, wsRoot.uri);
   vscode.env.clipboard.writeText(`[${title}](/${mdEscape})`);
 }
 
