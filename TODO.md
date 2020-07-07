@@ -28,3 +28,4 @@
 - Display first N articles
   - Maybe with a "..." tree item that shows the next N articles?
   - Purpose is to have topics like "Journal" that will potentially contain hundreds of entries, but not all need to be displayed.
+- Trim title lines - "# Title " should be interpreted as just "Title"
