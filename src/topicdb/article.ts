@@ -18,6 +18,14 @@ function getLinks(t: marked.Token): string[] {
     }
   }
 
+  if ("items" in t && t.items !== undefined) {
+    for (const item of t.items) {
+      for (const l of getLinks(item)) {
+        links.push(l);
+      }
+    }
+  }
+
   return links;
 }
 
