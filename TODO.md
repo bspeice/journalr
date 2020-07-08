@@ -30,3 +30,4 @@
   - Purpose is to have topics like "Journal" that will potentially contain hundreds of entries, but not all need to be displayed.
 - Trim title lines - "# Title " should be interpreted as just "Title"
 - Copy ID from editor tab context menu
+- Tag tracking; find text of the form `#my-tag` or `|my-tag` and link everything that uses that.
