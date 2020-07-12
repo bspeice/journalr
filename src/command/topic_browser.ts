@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import * as moment from "moment";
 import * as vscode from "vscode";
 import * as utils from "../utils";
 import { TopicEntry, EntryType, Topic, Article } from "../topicdb";

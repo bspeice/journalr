@@ -18,12 +18,9 @@
 - Don't use manual note parsing to get titles; may be worth using an actual lexer and looking for
   the first `h1`?
 - Relative-path link handling
-- Refresh topicBrowser on creating a new-subtopic; the URI doesn't match anything yet, but it does
-  need to be re-scanned.
 - Some sort of warning for things that _look_ like internal links, but can't be resolved? Broken
   links detector?
-- Maybe base everything on `uri.fsPath` instead of full URI?
-- Compute back/forward links even if the item isn't in the DB?
+- Maybe base everything on `uri.fsPath` instead of full URI for easier comparisons?
 - Duplicate links detector? Would be cool to have some help "refactoring" links so that you can tie
   articles together.
 - Display first N articles

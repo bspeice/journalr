@@ -21,7 +21,9 @@ export async function copyId(fileUri: vscode.Uri) {
 export async function copyIdWithTitle(fileUri: vscode.Uri) {
   const wsFolders = vscode.workspace.workspaceFolders ?? [];
   if (wsFolders.length == 0) {
-    await vscode.window.showInformationMessage("Unable to find workspace folders");
+    await vscode.window.showInformationMessage(
+      "Unable to find workspace folders"
+    );
     return;
   }
 

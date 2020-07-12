@@ -15,19 +15,18 @@ export interface TopicEntry {
   type: EntryType;
 }
 
-function zippedLinks(fs: vscode.FileSystem, article: Article): Thenable<[Article, vscode.Uri][]> {
-  return article.getLinks(fs).then((links) =>
-    links.map((l) => [article, l])
-  );
+function zippedLinks(
+  fs: vscode.FileSystem,
+  article: Article
+): Thenable<[Article, vscode.Uri][]> {
+  return article.getLinks(fs).then((links) => links.map((l) => [article, l]));
 }
 
 export class TopicDb {
   constructor(public topics: Topic[]) {}
 
   allArticles(fs: vscode.FileSystem): Thenable<Article[]> {
-    const articlesPromises = this.topics.map((t) =>
-      t.recurseArticles(fs)
-    );
+    const articlesPromises = this.topics.map((t) => t.recurseArticles(fs));
     const allArticles = Promise.all(articlesPromises);
 
     return allArticles.then((nested) =>
@@ -35,20 +34,24 @@ export class TopicDb {
     );
   }
 
-  findEntry(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(
+    fs: vscode.FileSystem,
+    uri: vscode.Uri
+  ): Thenable<TopicEntry | undefined> {
     // TODO: More efficient way to handle this besides resolving all promises?
     // We only care about the first match. That said, early returns from topics
     // that know they can't have the element maybe make this less problematic?
-    return Promise.all(this.topics.map((t) => t.findEntry(fs, uri)))
-    .then((matches) => {
-      for (const match of matches) {
-        if (match !== undefined) {
-          return match;
+    return Promise.all(this.topics.map((t) => t.findEntry(fs, uri))).then(
+      (matches) => {
+        for (const match of matches) {
+          if (match !== undefined) {
+            return match;
+          }
         }
+
+        return undefined;
       }
-      
-      return undefined;
-    })
+    );
   }
 
   allTopics(fs: vscode.FileSystem): Thenable<Topic[]> {
@@ -57,18 +60,14 @@ export class TopicDb {
     });
     const allTopics = Promise.all(topicPromises);
 
-    return allTopics
-      .then((nested) => nested.reduce((acc, t) => acc.concat(t), []));
+    return allTopics.then((nested) =>
+      nested.reduce((acc, t) => acc.concat(t), [])
+    );
   }
 
-  backLinks(
-    fs: vscode.FileSystem,
-    needle: Article,
-  ): Thenable<Article[]> {
+  backLinks(fs: vscode.FileSystem, needle: Article): Thenable<Article[]> {
     const haystack = this.allArticles(fs)
-      .then((articles) =>
-        Promise.all(articles.map((a) => zippedLinks(fs, a)))
-      )
+      .then((articles) => Promise.all(articles.map((a) => zippedLinks(fs, a))))
       .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
 
     return haystack.then((pairs) => {
@@ -104,9 +103,11 @@ export class WorkspaceWatcher implements DatabaseWatcher {
     this.emitter = new vscode.EventEmitter();
     this.onRefresh = this.emitter.event;
 
-    this.watcher = vscode.workspace.createFileSystemWatcher(
-      `**/*.{${utils.MD_EXTENSIONS.join(",")}}`
-    );
+    // Note: We watch *everything* because we're interested in topics being created, not just articles.
+    // this.watcher = vscode.workspace.createFileSystemWatcher(
+    //   `**/*.{${utils.MD_EXTENSIONS.join(",")}}`
+    // );
+    this.watcher = vscode.workspace.createFileSystemWatcher("**/*");
     this.watcher.onDidChange(this.onDidChange, this);
     this.watcher.onDidCreate(this.onDidCreate, this);
     this.watcher.onDidDelete(this.onDidDelete, this);

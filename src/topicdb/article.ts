@@ -1,8 +1,8 @@
-import * as marked from 'marked';
-import * as vscode from 'vscode';
-import * as utils from '../utils';
+import * as marked from "marked";
+import * as vscode from "vscode";
+import * as utils from "../utils";
 import { TopicEntry, EntryType, Topic } from ".";
-import { relative } from 'path';
+import { relative } from "path";
 
 function getLinks(t: marked.Token): string[] {
   var links = [];
@@ -43,17 +43,21 @@ function isArticleLink(l: string | null): boolean {
   return true;
 }
 
-export function readMdTitle(fs: vscode.FileSystem, uri: vscode.Uri, uriRoot: vscode.Uri): Thenable<string> {
+export function readMdTitle(
+  fs: vscode.FileSystem,
+  uri: vscode.Uri,
+  uriRoot: vscode.Uri
+): Thenable<string> {
   // If the document contains a `# ` as the first characters, treat that as the title.
   // Otherwise, just use the `basename`.
   return fs.readFile(uri).then((content) => {
-      if (content.length > 2 && content.slice(0, 2).toString() === "# ") {
-        const lineEnd = content.findIndex((c) => c === '\n'.charCodeAt(0));
-        return content.slice(2, lineEnd).toString();
-      }
+    if (content.length > 2 && content.slice(0, 2).toString() === "# ") {
+      const lineEnd = content.findIndex((c) => c === "\n".charCodeAt(0));
+      return content.slice(2, lineEnd).toString();
+    }
 
-      return relative(uriRoot.fsPath, uri.fsPath);
-  })
+    return relative(uriRoot.fsPath, uri.fsPath);
+  });
 }
 
 export class Article implements TopicEntry {
@@ -64,7 +68,7 @@ export class Article implements TopicEntry {
     public title: string,
     public uri: vscode.Uri,
     public rootUri: vscode.Uri,
-    public parent: Topic,
+    public parent: Topic
   ) {
     this.type = EntryType.Article;
   }
@@ -74,7 +78,8 @@ export class Article implements TopicEntry {
       return Promise.resolve(this.articleLinks);
     }
 
-    const links = fs.readFile(this.uri)
+    const links = fs
+      .readFile(this.uri)
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
@@ -110,30 +115,29 @@ export class Article implements TopicEntry {
     fs: vscode.FileSystem,
     uri: vscode.Uri,
     rootUri: vscode.Uri,
-    topic: Topic,
+    topic: Topic
   ): Thenable<Article | undefined> {
-    const isFile = fs.stat(uri)
-    .then((s) => s.type === vscode.FileType.File);
+    const isFile = fs.stat(uri).then((s) => s.type === vscode.FileType.File);
 
     const title = isFile.then((isFile) => {
-        if (!isFile) {
-            return undefined;
-        }
+      if (!isFile) {
+        return undefined;
+      }
 
-        const extension = uri.path.split(".").reverse()[0];
-        if (!utils.MD_EXTENSIONS.includes(extension)) {
-            return undefined;
-        }
+      const extension = uri.path.split(".").reverse()[0];
+      if (!utils.MD_EXTENSIONS.includes(extension)) {
+        return undefined;
+      }
 
-        return readMdTitle(fs, uri, rootUri);
+      return readMdTitle(fs, uri, rootUri);
     });
 
     return title.then((title) => {
-        if (title === undefined) {
-            return undefined;
-        }
+      if (title === undefined) {
+        return undefined;
+      }
 
-        return new Article(title, uri, rootUri, topic);
-    })
+      return new Article(title, uri, rootUri, topic);
+    });
   }
 }

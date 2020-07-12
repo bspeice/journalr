@@ -1,7 +1,7 @@
-import * as minimatch from 'minimatch';
-import * as vscode from 'vscode';
+import * as minimatch from "minimatch";
+import * as vscode from "vscode";
 import { TopicEntry, EntryType } from ".";
-import { Article } from './article';
+import { Article } from "./article";
 
 function matches(pattern: vscode.Uri, globs: string[]): boolean {
   const path = vscode.workspace.asRelativePath(pattern);
@@ -16,7 +16,6 @@ function joinUri(
   return [name, vscode.Uri.joinPath(root, name), ft];
 }
 
-
 export class Topic implements TopicEntry {
   public type: EntryType;
   private entries: Thenable<TopicEntry[]> | undefined;
@@ -26,7 +25,7 @@ export class Topic implements TopicEntry {
     public uri: vscode.Uri,
     public rootUri: vscode.Uri,
     public ignoreGlobs: string[],
-    public parent: Topic | undefined,
+    public parent: Topic | undefined
   ) {
     this.type = EntryType.Topic;
   }
@@ -45,7 +44,8 @@ export class Topic implements TopicEntry {
     }
 
     // TODO: I'm seeing some weird issues when not using the `readDirectory` function by name
-    const entries = fs.readDirectory(this.uri)
+    const entries = fs
+      .readDirectory(this.uri)
       .then((d) => d.map(([name, ft]) => joinUri(name, this.uri, ft)))
       .then((d) => d.filter(([, uri]) => !matches(uri, this.ignoreGlobs)))
       .then((dirEntries) => {
@@ -70,16 +70,22 @@ export class Topic implements TopicEntry {
     return entries;
   }
 
-  findEntry(fs: vscode.FileSystem, uri: vscode.Uri): Thenable<TopicEntry | undefined> {
+  findEntry(
+    fs: vscode.FileSystem,
+    uri: vscode.Uri
+  ): Thenable<TopicEntry | undefined> {
     // First, check if it's possible for us to contain this entry
-    const thisPathComponents = this.uri.fsPath.split('/');
-    const thatPathComponents = uri.fsPath.split('/').slice(0, thisPathComponents.length);
+    const thisPathComponents = this.uri.fsPath.split("/");
+    const thatPathComponents = uri.fsPath
+      .split("/")
+      .slice(0, thisPathComponents.length);
 
     // WHY THE HELL CAN'T I COMPARE ARRAYS IN JAVASCRIPT???
     if (thisPathComponents.length !== thatPathComponents.length) {
       return Promise.resolve(undefined);
     }
-    const isEqual = thisPathComponents.map((v, i) => v === thatPathComponents[i])
+    const isEqual = thisPathComponents
+      .map((v, i) => v === thatPathComponents[i])
       .reduce((acc, v) => acc && v, true);
     if (!isEqual) {
       return Promise.resolve(undefined);
@@ -87,8 +93,7 @@ export class Topic implements TopicEntry {
 
     // For all our entries, if there's a match, return immediately. Otherwise, allow topics
     // to recurse.
-    return this.getEntries(fs)
-    .then((entries) => {
+    return this.getEntries(fs).then((entries) => {
       const toScan = [];
       for (const entry of entries) {
         if (entry.type === EntryType.Article) {
@@ -102,7 +107,7 @@ export class Topic implements TopicEntry {
             return e;
           }
 
-          toScan.push(e.findEntry(fs, uri))
+          toScan.push(e.findEntry(fs, uri));
         }
       }
 
@@ -115,7 +120,7 @@ export class Topic implements TopicEntry {
         }
 
         return undefined;
-      })
+      });
     });
   }
 

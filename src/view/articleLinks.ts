@@ -56,8 +56,9 @@ export class ArticleLinkProvider
   private _onDidChangeTreeData: vscode.EventEmitter<
     ArticleLinkElement | undefined
   > = new vscode.EventEmitter<ArticleLinkElement | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<ArticleLinkElement | undefined> = this
-    ._onDidChangeTreeData.event;
+  readonly onDidChangeTreeData: vscode.Event<
+    ArticleLinkElement | undefined
+  > = this._onDidChangeTreeData.event;
 
   private currentEditor: vscode.TextEditor | undefined;
   private currentDatabase: TopicDb;
@@ -100,14 +101,15 @@ export class ArticleLinkProvider
     }
 
     const currentUri = this.currentEditor.document.uri;
-    const currentArticle = this.currentDatabase.findEntry(vscode.workspace.fs, currentUri)
-    .then((e) => {
-      if (e !== undefined && e.type === EntryType.Article) {
-        return e as Article;
-      }
+    const currentArticle = this.currentDatabase
+      .findEntry(vscode.workspace.fs, currentUri)
+      .then((e) => {
+        if (e !== undefined && e.type === EntryType.Article) {
+          return e as Article;
+        }
 
-      return undefined;
-    });
+        return undefined;
+      });
 
     return currentArticle.then((a) => {
       if (a === undefined) {
@@ -118,7 +120,11 @@ export class ArticleLinkProvider
         const articles = a
           .getLinks(vscode.workspace.fs)
           .then((links) => {
-            return Promise.all(links.map((l) => this.currentDatabase.findEntry(vscode.workspace.fs, l)));
+            return Promise.all(
+              links.map((l) =>
+                this.currentDatabase.findEntry(vscode.workspace.fs, l)
+              )
+            );
           })
           .then((articles) =>
             articles.filter((a) => a !== undefined)

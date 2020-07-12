@@ -83,9 +83,9 @@ export class TopicBrowserProvider
 
   getParent(element: TopicEntry): vscode.ProviderResult<TopicEntry> {
     if (element.type === EntryType.Article) {
-      return (element as Article).parent
+      return (element as Article).parent;
     } else if (element.type === EntryType.Topic) {
-      return (element as Topic).parent
+      return (element as Topic).parent;
     }
 
     return undefined;
@@ -174,7 +174,10 @@ export class CollapseTracker {
 export class ArticleFocusTracker {
   private topicDb: TopicDb;
 
-  constructor(private treeView: vscode.TreeView<TopicEntry>, private dbWatcher: DatabaseWatcher) {
+  constructor(
+    private treeView: vscode.TreeView<TopicEntry>,
+    private dbWatcher: DatabaseWatcher
+  ) {
     this.topicDb = dbWatcher.currentDb();
     dbWatcher.onRefresh(this.refreshDb, this);
 
@@ -192,27 +195,19 @@ export class ArticleFocusTracker {
     }
 
     const uri = newEditor.document.uri;
-    return this.topicDb.findEntry(vscode.workspace.fs, uri)
-    .then((entry) => {
-      if (entry !== undefined) {
-        console.log(`Attempting to locate uri=${uri}`);
-      }
+    return this.topicDb
+      .findEntry(vscode.workspace.fs, uri)
+      .then((entry) => {
+        if (entry === undefined) {
+          return;
+        } else if (entry.type === EntryType.Topic) {
+          // This shouldn't be possible; I'm not aware of a way to open a folder as an editor item,
+          // but we explicitly handle it just in case.
+          return;
+        }
 
-      return entry;
-    })
-    .then((entry) => {
-      if (entry === undefined) {
-        console.log(`uri=${uri} was not found`)
-        return;
-      } else if (entry.type === EntryType.Topic) {
-        // This shouldn't be possible; I'm not aware of a way to open a folder as an editor item,
-        // but we explicitly handle it just in case.
-        return;
-      }
-
-      console.log(`uri=${uri} was found`);
-      return this.treeView.reveal(entry);
-    })
+        return this.treeView.reveal(entry);
+      });
   }
 }
 
