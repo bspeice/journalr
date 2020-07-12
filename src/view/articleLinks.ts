@@ -118,7 +118,7 @@ export class ArticleLinkProvider
         const articles = a
           .getLinks(vscode.workspace.fs)
           .then((links) => {
-            return Promise.all(links.map((l) => Article.fromUri(vscode.workspace.fs, l, a.rootUri)));
+            return Promise.all(links.map((l) => this.currentDatabase.findEntry(vscode.workspace.fs, l)));
           })
           .then((articles) =>
             articles.filter((a) => a !== undefined)

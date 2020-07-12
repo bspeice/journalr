@@ -25,7 +25,8 @@ export class Topic implements TopicEntry {
     public title: string,
     public uri: vscode.Uri,
     public rootUri: vscode.Uri,
-    public ignoreGlobs: string[]
+    public ignoreGlobs: string[],
+    public parent: Topic | undefined,
   ) {
     this.type = EntryType.Topic;
   }
@@ -50,13 +51,13 @@ export class Topic implements TopicEntry {
       .then((dirEntries) => {
         const articles = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.File)
-          .map(([, uri]) => Article.fromUri(fs, uri, this.rootUri))
+          .map(([, uri]) => Article.fromUri(fs, uri, this.rootUri, this))
           .reverse();
 
         const topics = dirEntries
           .filter(([, , ft]) => ft === vscode.FileType.Directory)
           .map(([name, uri]) => {
-            return new Topic(name, uri, this.rootUri, this.ignoreGlobs);
+            return new Topic(name, uri, this.rootUri, this.ignoreGlobs, this);
           })
           .map((t) => Promise.resolve(t)) as Thenable<TopicEntry | undefined>[];
 

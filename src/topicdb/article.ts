@@ -1,7 +1,7 @@
 import * as marked from 'marked';
 import * as vscode from 'vscode';
 import * as utils from '../utils';
-import { TopicEntry, EntryType } from ".";
+import { TopicEntry, EntryType, Topic } from ".";
 import { relative } from 'path';
 
 function getLinks(t: marked.Token): string[] {
@@ -63,7 +63,8 @@ export class Article implements TopicEntry {
   constructor(
     public title: string,
     public uri: vscode.Uri,
-    public rootUri: vscode.Uri
+    public rootUri: vscode.Uri,
+    public parent: Topic,
   ) {
     this.type = EntryType.Article;
   }
@@ -108,7 +109,8 @@ export class Article implements TopicEntry {
   static fromUri(
     fs: vscode.FileSystem,
     uri: vscode.Uri,
-    rootUri: vscode.Uri
+    rootUri: vscode.Uri,
+    topic: Topic,
   ): Thenable<Article | undefined> {
     const isFile = fs.stat(uri)
     .then((s) => s.type === vscode.FileType.File);
@@ -131,7 +133,7 @@ export class Article implements TopicEntry {
             return undefined;
         }
 
-        return new Article(title, uri, rootUri);
+        return new Article(title, uri, rootUri, topic);
     })
   }
 }

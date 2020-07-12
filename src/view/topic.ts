@@ -48,11 +48,11 @@ export class TopicBrowserProvider
   private topicDb: TopicDb;
 
   constructor(
-    watcher: DatabaseWatcher,
+    dbWatcher: DatabaseWatcher,
     public collapseTracker: CollapseTracker
   ) {
-    this.topicDb = watcher.currentDb();
-    watcher.onRefresh(this.refresh, this);
+    this.topicDb = dbWatcher.currentDb();
+    dbWatcher.onRefresh(this.refresh, this);
   }
 
   refresh(topicDb?: TopicDb): void {
@@ -79,6 +79,14 @@ export class TopicBrowserProvider
       default:
         throw new Error("Unrecognized topic type");
     }
+  }
+
+  getParent(element: TopicEntry): vscode.ProviderResult<TopicEntry> {
+    if (element.type === EntryType.Article) {
+      return (element as Article).parent
+    }
+
+    return undefined;
   }
 
   getChildren(
@@ -161,6 +169,42 @@ export class CollapseTracker {
   }
 }
 
+export class ArticleFocusTracker {
+  private topicDb: TopicDb;
+
+  constructor(private treeView: vscode.TreeView<TopicEntry>, private dbWatcher: DatabaseWatcher) {
+    this.topicDb = dbWatcher.currentDb();
+    dbWatcher.onRefresh(this.refreshDb, this);
+
+    this.focusArticle(vscode.window.activeTextEditor);
+    vscode.window.onDidChangeActiveTextEditor(this.focusArticle, this);
+  }
+
+  refreshDb(topicDb: TopicDb) {
+    this.topicDb = topicDb;
+  }
+
+  focusArticle(newEditor: vscode.TextEditor | undefined) {
+    if (newEditor === undefined) {
+      return;
+    }
+
+    const uri = newEditor.document.uri;
+    return this.topicDb.findEntry(vscode.workspace.fs, uri)
+    .then((entry) => {
+      if (entry === undefined) {
+        return;
+      } else if (entry.type === EntryType.Topic) {
+        // This shouldn't be possible; I'm not aware of a way to open a folder as an editor item,
+        // but we explicitly handle it just in case.
+        return;
+      }
+
+      return this.treeView.reveal(entry);
+    })
+  }
+}
+
 export function register(
   context: vscode.ExtensionContext,
   workspaceWatcher: WorkspaceWatcher
@@ -183,5 +227,8 @@ export function register(
   treeView.onDidExpandElement(topicProvider.onDidExpandElement, topicProvider);
 
   context.subscriptions.push(treeView);
+
+  new ArticleFocusTracker(treeView, workspaceWatcher);
+
   return topicProvider;
 }

@@ -97,7 +97,7 @@ export class WorkspaceWatcher implements DatabaseWatcher {
     const wsFolders = vscode.workspace.workspaceFolders ?? [];
     const ignore = config.ignoreGlobs;
     const topics = wsFolders.map((f) => {
-      return new Topic(f.name, f.uri, f.uri, ignore);
+      return new Topic(f.name, f.uri, f.uri, ignore, undefined);
     });
     this.database = new TopicDb(topics);
 
