@@ -84,6 +84,8 @@ export class TopicBrowserProvider
   getParent(element: TopicEntry): vscode.ProviderResult<TopicEntry> {
     if (element.type === EntryType.Article) {
       return (element as Article).parent
+    } else if (element.type === EntryType.Topic) {
+      return (element as Topic).parent
     }
 
     return undefined;
@@ -192,7 +194,15 @@ export class ArticleFocusTracker {
     const uri = newEditor.document.uri;
     return this.topicDb.findEntry(vscode.workspace.fs, uri)
     .then((entry) => {
+      if (entry !== undefined) {
+        console.log(`Attempting to locate uri=${uri}`);
+      }
+
+      return entry;
+    })
+    .then((entry) => {
       if (entry === undefined) {
+        console.log(`uri=${uri} was not found`)
         return;
       } else if (entry.type === EntryType.Topic) {
         // This shouldn't be possible; I'm not aware of a way to open a folder as an editor item,
@@ -200,6 +210,7 @@ export class ArticleFocusTracker {
         return;
       }
 
+      console.log(`uri=${uri} was found`);
       return this.treeView.reveal(entry);
     })
   }

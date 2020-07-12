@@ -22,8 +22,6 @@
 - Maybe base everything on `uri.fsPath` instead of full URI?
 - Compute back/forward links even if the item isn't in the DB?
 - Duplicate links detector? Would be cool to have some help "refactoring" links so that you can tie articles together.
-- If the active text editor changes to an article in the database, the topic view should focus it
-  - Mostly working, but seems like there are issues focusing articles that don't have an explicit title?
 - Display first N articles
   - Maybe with a "..." tree item that shows the next N articles?
   - Purpose is to have topics like "Journal" that will potentially contain hundreds of entries, but not all need to be displayed.
