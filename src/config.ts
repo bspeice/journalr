@@ -5,6 +5,7 @@ export interface JournalrConfig {
   contextMenuFormat: string;
   journalFormats: string[];
   ignoreGlobs: string[];
+  tagPrefix: string;
 }
 
 function buildConfig(): JournalrConfig {
@@ -15,6 +16,7 @@ function buildConfig(): JournalrConfig {
     contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDD[.md]",
     journalFormats: journalr.get("journalFormats") ?? [],
     ignoreGlobs: journalr.get("ignoreGlobs") ?? ["**/.*"],
+    tagPrefix: journalr.get("tagCharacter") ?? "#",
   };
 }
 
@@ -28,6 +30,7 @@ const CONFIG_KEYS = [
   "journalr.contextMenuFormat",
   "journalr.journalFormats",
   "journalr.ignoreGlobs",
+  "journalr.tagPrefix",
 ];
 
 export class WorkspaceConfig implements ConfigWatcher {

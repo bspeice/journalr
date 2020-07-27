@@ -15,6 +15,7 @@
   ],
   "activationEvents": [
     "onView:journalr.articleLinks",
+    "onView:journalr.tagBrowser",
     "onView:journalr.topicBrowser",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",
@@ -274,6 +275,14 @@
         {
           "id": "journalr.articleLinks",
           "name": "Note Links"
+        },
+        {
+          "id": "journalr.articleTags",
+          "name": "Note Tags"
+        },
+        {
+          "id": "journalr.tagBrowser",
+          "name": "Tags"
         },
         {
           "id": "journalr.topicBrowser",

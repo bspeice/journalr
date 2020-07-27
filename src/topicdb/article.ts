@@ -5,7 +5,7 @@ import { TopicEntry, EntryType, Topic } from ".";
 import { relative } from "path";
 
 function getLinks(t: marked.Token): string[] {
-  var links = [];
+  const links = [];
   if ("href" in t) {
     links.push(t.href);
   }
@@ -27,6 +27,28 @@ function getLinks(t: marked.Token): string[] {
   }
 
   return links;
+}
+
+function getTags(t: marked.Token, tagPrefix: string): string[] {
+  const tags = [];
+
+  if ("tokens" in t && t.tokens !== undefined) {
+    for (const subT of t.tokens) {
+      for (const tag of getTags(subT, tagPrefix)) {
+        tags.push(tag);
+      }
+    }
+  }
+
+  if ("text" in t) {
+    for (const word in t.text.split(" ")) {
+      if (word.startsWith(tagPrefix)) {
+        tags.push(word.substring(tagPrefix.length));
+      }
+    }
+  }
+
+  return tags;
 }
 
 function isArticleLink(l: string | null): boolean {
@@ -62,7 +84,11 @@ export function readMdTitle(
 
 export class Article implements TopicEntry {
   public type: EntryType;
+  // TODO: Only read the file once, cache both the links and tags
+  // TODO: For purposes of the DB, this should be a set of URI's; we don't care about repeats.
   private articleLinks: Thenable<vscode.Uri[]> | undefined;
+  // TODO: Invalidate tags if the tag prefix changes
+  private tags: Thenable<string[]> | undefined;
 
   constructor(
     public title: string,
@@ -83,6 +109,7 @@ export class Article implements TopicEntry {
       .then((text) => {
         const tokens = marked.lexer(text.toString());
         const inlineLinks = tokens
+          // Note: The `getLinks` call here is _not_ the same as `this.getLinks`.
           .map(getLinks)
           .reduce((acc, i) => acc.concat(i), [])
           .filter(isArticleLink);
@@ -100,11 +127,30 @@ export class Article implements TopicEntry {
         return inlineLinks.concat(freestandingLinks).map(toUri);
       })
       .then((links) => links.filter((l) => l !== undefined)) as Thenable<
-      vscode.Uri[]
-    >;
+        vscode.Uri[]
+      >;
 
     this.articleLinks = links;
     return links;
+  }
+
+  getTags(fs: vscode.FileSystem, tagPrefix: string): Thenable<string[]> {
+    if (this.tags !== undefined) {
+      return Promise.resolve(this.tags);
+    }
+
+    const getTagWithPrefix = (t: marked.Token) => getTags(t, tagPrefix);
+
+    const tags = fs
+      .readFile(this.uri)
+      .then((text) => {
+        return marked.lexer(text.toString())
+          .map(getTagWithPrefix)
+          .reduce((acc, i) => acc.concat(i), []);
+      })
+
+    this.tags = tags;
+    return tags;
   }
 
   invalidate() {

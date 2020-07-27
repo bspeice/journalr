@@ -3,6 +3,7 @@ import * as utils from "../utils";
 import { JournalrConfig } from "../config";
 import { Article } from "./article";
 import { Topic } from "./topic";
+import { access } from "fs";
 
 export { Article, Topic };
 
@@ -22,17 +23,12 @@ function zippedLinks(
   return article.getLinks(fs).then((links) => links.map((l) => [article, l]));
 }
 
+function zippedTags(fs: vscode.FileSystem, article: Article, tagPrefix: string): Thenable<[Article, string][]> {
+  return article.getTags(fs, tagPrefix).then((tags) => tags.map((t) => [article, t]));
+}
+
 export class TopicDb {
-  constructor(public topics: Topic[]) {}
-
-  allArticles(fs: vscode.FileSystem): Thenable<Article[]> {
-    const articlesPromises = this.topics.map((t) => t.recurseArticles(fs));
-    const allArticles = Promise.all(articlesPromises);
-
-    return allArticles.then((nested) =>
-      nested.reduce((acc, a) => acc.concat(a), [])
-    );
-  }
+  constructor(public topics: Topic[]) { }
 
   findEntry(
     fs: vscode.FileSystem,
@@ -40,7 +36,7 @@ export class TopicDb {
   ): Thenable<TopicEntry | undefined> {
     // TODO: More efficient way to handle this besides resolving all promises?
     // We only care about the first match. That said, early returns from topics
-    // that know they can't have the element maybe make this less problematic?
+    // that know they can't have the element may make this less problematic?
     return Promise.all(this.topics.map((t) => t.findEntry(fs, uri))).then(
       (matches) => {
         for (const match of matches) {
@@ -51,6 +47,15 @@ export class TopicDb {
 
         return undefined;
       }
+    );
+  }
+
+  allArticles(fs: vscode.FileSystem): Thenable<Article[]> {
+    const articlesPromises = this.topics.map((t) => t.recurseArticles(fs));
+    const allArticles = Promise.all(articlesPromises);
+
+    return allArticles.then((nested) =>
+      nested.reduce((acc, a) => acc.concat(a), [])
     );
   }
 
@@ -75,6 +80,17 @@ export class TopicDb {
         .filter(([, link]) => link.fsPath === needle.uri.fsPath)
         .map(([article]) => article);
     });
+  }
+
+  tagged(fs: vscode.FileSystem, tag: string, tagPrefix: string): Thenable<Article[]> {
+    const haystack = this.allArticles(fs)
+      .then((articles) => Promise.all(articles.map((a) => zippedTags(fs, a, tagPrefix))))
+      .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
+
+    return haystack.then((pairs) => {
+      return pairs.filter(([, t]) => t === tag)
+        .map(([article,]) => article);
+    })
   }
 }
 
