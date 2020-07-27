@@ -87,7 +87,7 @@ export class Article implements TopicEntry {
   // TODO: Only read the file once, cache both the links and tags
   // TODO: For purposes of the DB, this should be a set of URI's; we don't care about repeats.
   private articleLinks: Thenable<vscode.Uri[]> | undefined;
-  // TODO: Invalidate tags if the tag prefix changes
+  private tagPrefix: string | undefined;
   private tags: Thenable<string[]> | undefined;
 
   constructor(
@@ -135,7 +135,7 @@ export class Article implements TopicEntry {
   }
 
   getTags(fs: vscode.FileSystem, tagPrefix: string): Thenable<string[]> {
-    if (this.tags !== undefined) {
+    if (this.tags !== undefined && this.tagPrefix === tagPrefix) {
       return Promise.resolve(this.tags);
     }
 
@@ -150,6 +150,7 @@ export class Article implements TopicEntry {
       })
 
     this.tags = tags;
+    this.tagPrefix = tagPrefix;
     return tags;
   }
 
