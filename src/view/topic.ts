@@ -195,19 +195,17 @@ export class ArticleFocusTracker {
     }
 
     const uri = newEditor.document.uri;
-    return this.topicDb
-      .findEntry(vscode.workspace.fs, uri)
-      .then((entry) => {
-        if (entry === undefined) {
-          return;
-        } else if (entry.type === EntryType.Topic) {
-          // This shouldn't be possible; I'm not aware of a way to open a folder as an editor item,
-          // but we explicitly handle it just in case.
-          return;
-        }
+    return this.topicDb.findEntry(vscode.workspace.fs, uri).then((entry) => {
+      if (entry === undefined) {
+        return;
+      } else if (entry.type === EntryType.Topic) {
+        // This shouldn't be possible; I'm not aware of a way to open a folder as an editor item,
+        // but we explicitly handle it just in case.
+        return;
+      }
 
-        return this.treeView.reveal(entry);
-      });
+      return this.treeView.reveal(entry);
+    });
   }
 }
 

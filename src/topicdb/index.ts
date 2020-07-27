@@ -23,12 +23,18 @@ function zippedLinks(
   return article.getLinks(fs).then((links) => links.map((l) => [article, l]));
 }
 
-function zippedTags(fs: vscode.FileSystem, article: Article, tagPrefix: string): Thenable<[Article, string][]> {
-  return article.getTags(fs, tagPrefix).then((tags) => tags.map((t) => [article, t]));
+function zippedTags(
+  fs: vscode.FileSystem,
+  article: Article,
+  tagPrefix: string
+): Thenable<[Article, string][]> {
+  return article
+    .getTags(fs, tagPrefix)
+    .then((tags) => tags.map((t) => [article, t]));
 }
 
 export class TopicDb {
-  constructor(public topics: Topic[]) { }
+  constructor(public topics: Topic[]) {}
 
   findEntry(
     fs: vscode.FileSystem,
@@ -82,15 +88,20 @@ export class TopicDb {
     });
   }
 
-  tagged(fs: vscode.FileSystem, tag: string, tagPrefix: string): Thenable<Article[]> {
+  tagged(
+    fs: vscode.FileSystem,
+    tag: string,
+    tagPrefix: string
+  ): Thenable<Article[]> {
     const haystack = this.allArticles(fs)
-      .then((articles) => Promise.all(articles.map((a) => zippedTags(fs, a, tagPrefix))))
+      .then((articles) =>
+        Promise.all(articles.map((a) => zippedTags(fs, a, tagPrefix)))
+      )
       .then((vals) => vals.reduce((acc, v) => acc.concat(v)));
 
     return haystack.then((pairs) => {
-      return pairs.filter(([, t]) => t === tag)
-        .map(([article,]) => article);
-    })
+      return pairs.filter(([, t]) => t === tag).map(([article]) => article);
+    });
   }
 }
 

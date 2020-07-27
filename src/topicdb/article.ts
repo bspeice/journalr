@@ -29,26 +29,27 @@ function getLinks(t: marked.Token): string[] {
   return links;
 }
 
+// TODO: Strip punctuation. #like, seriously.
 function getTags(t: marked.Token, tagPrefix: string): string[] {
-  const tags = [];
+  const tags = new Set<string>();
 
   if ("tokens" in t && t.tokens !== undefined) {
     for (const subT of t.tokens) {
       for (const tag of getTags(subT, tagPrefix)) {
-        tags.push(tag);
+        tags.add(tag);
       }
     }
   }
 
   if ("text" in t) {
-    for (const word in t.text.split(" ")) {
+    for (const word of t.text.split(" ")) {
       if (word.startsWith(tagPrefix)) {
-        tags.push(word.substring(tagPrefix.length));
+        tags.add(word.substring(tagPrefix.length));
       }
     }
   }
 
-  return tags;
+  return Array.from(tags);
 }
 
 function isArticleLink(l: string | null): boolean {
@@ -127,8 +128,8 @@ export class Article implements TopicEntry {
         return inlineLinks.concat(freestandingLinks).map(toUri);
       })
       .then((links) => links.filter((l) => l !== undefined)) as Thenable<
-        vscode.Uri[]
-      >;
+      vscode.Uri[]
+    >;
 
     this.articleLinks = links;
     return links;
@@ -141,13 +142,15 @@ export class Article implements TopicEntry {
 
     const getTagWithPrefix = (t: marked.Token) => getTags(t, tagPrefix);
 
-    const tags = fs
-      .readFile(this.uri)
-      .then((text) => {
-        return marked.lexer(text.toString())
-          .map(getTagWithPrefix)
-          .reduce((acc, i) => acc.concat(i), []);
-      })
+    const tags = fs.readFile(this.uri).then((text) => {
+      return marked
+        .lexer(text.toString())
+        .map(getTagWithPrefix)
+        .reduce((acc, i) => acc.concat(i), []);
+    }).then((tags) => {
+      console.log(`Found tags: ${tags}`);
+      return tags;
+    });
 
     this.tags = tags;
     this.tagPrefix = tagPrefix;
