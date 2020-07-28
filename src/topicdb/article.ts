@@ -44,7 +44,11 @@ function getTags(t: marked.Token, tagPrefix: string): string[] {
   if ("text" in t) {
     for (const word of t.text.split(" ")) {
       if (word.startsWith(tagPrefix)) {
-        tags.add(word.substring(tagPrefix.length));
+        const tag = word.substring(tagPrefix.length);
+
+        if (tag.length > 0) {
+          tags.add(tag);
+        }
       }
     }
   }

@@ -16,7 +16,7 @@ function buildConfig(): JournalrConfig {
     contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDD[.md]",
     journalFormats: journalr.get("journalFormats") ?? [],
     ignoreGlobs: journalr.get("ignoreGlobs") ?? ["**/.*"],
-    tagPrefix: journalr.get("tagCharacter") ?? "#",
+    tagPrefix: journalr.get("tagPrefix") ?? "#",
   };
 }
 

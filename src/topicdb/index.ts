@@ -65,6 +65,15 @@ export class TopicDb {
     );
   }
 
+  allTags(fs: vscode.FileSystem, tagPrefix: string): Thenable<string[]> {
+    return this.allArticles(fs)
+      .then((articles) =>
+        Promise.all(articles.map((a) => a.getTags(fs, tagPrefix)))
+      )
+      .then((vals) => vals.reduce((acc, v) => acc.concat(v)))
+      .then((vals) => Array.from(new Set(vals)));
+  }
+
   allTopics(fs: vscode.FileSystem): Thenable<Topic[]> {
     const topicPromises = this.topics.map((t) => {
       return t.recurseTopics(fs);

@@ -2,12 +2,12 @@ import * as vscode from "vscode";
 import { Article, TopicDb, DatabaseWatcher, EntryType } from "../topicdb";
 import { ConfigWatcher, JournalrConfig } from "../config";
 
-enum ArticleTagType {
+export enum ArticleTagType {
   Tag = 1,
   Article,
 }
 
-class ArticleTagElement {
+export class ArticleTagElement {
   private constructor(
     public type: ArticleTagType,
     public element: Article | string
