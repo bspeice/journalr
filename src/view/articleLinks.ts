@@ -37,7 +37,7 @@ export class ArticleLinkElement {
       contextValue: "journalr.article",
       command: {
         title: "Show Article",
-        command: "journalr.topicBrowser.showArticle",
+        command: "journalr.general.showArticle",
         arguments: [this.article],
       },
     };

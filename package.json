@@ -20,10 +20,10 @@
     "onView:journalr.topicBrowser",
     "onCommand:journalr.attachment.insertAttachment",
     "onCommand:journalr.attachment.insertImage",
-    "onCommand:journalr.articleLinks.showArticle",
     "onCommand:journalr.explorer.createNote",
     "onCommand:journalr.explorer.copyId",
     "onCommand:journalr.explorer.copyIdWithTitle",
+    "onCommand:journalr.general.showArticle",
     "onCommand:journalr.journal.createJournal",
     "onCommand:journalr.palette.copyId",
     "onCommand:journalr.palette.copyIdWithTitle",
@@ -32,8 +32,7 @@
     "onCommand:journalr.topicBrowser.copyIdWithTitle",
     "onCommand:journalr.topicBrowser.createNote",
     "onCommand:journalr.topicBrowser.createTopic",
-    "onCommand:journalr.topicBrowser.createRootTopic",
-    "onCommand:journalr.topicBrowser.showArticle"
+    "onCommand:journalr.topicBrowser.createRootTopic"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -87,11 +86,6 @@
         "category": "Journalr"
       },
       {
-        "command": "journalr.backlinks.showArticle",
-        "title": "Show Article",
-        "category": "Journalr"
-      },
-      {
         "command": "journalr.explorer.createNote",
         "title": "Create Note",
         "category": "Journalr"
@@ -104,6 +98,11 @@
       {
         "command": "journalr.explorer.copyIdWithTitle",
         "title": "Copy Note ID (with title)",
+        "category": "Journalr"
+      },
+      {
+        "command": "journalr.general.showArticle",
+        "title": "Show Article",
         "category": "Journalr"
       },
       {
@@ -160,19 +159,10 @@
         "title": "Create Topic",
         "category": "Journalr",
         "icon": "$(file-directory-create)"
-      },
-      {
-        "command": "journalr.topicBrowser.showArticle",
-        "title": "Show Article",
-        "category": "Journalr"
       }
     ],
     "menus": {
       "commandPalette": [
-        {
-          "command": "journalr.backlinks.showArticle",
-          "when": "false"
-        },
         {
           "command": "journalr.explorer.createNote",
           "when": "false"
@@ -183,6 +173,10 @@
         },
         {
           "command": "journalr.explorer.copyIdWithTitle",
+          "when": "false"
+        },
+        {
+          "command": "journalr.general.showArticle",
           "when": "false"
         },
         {
@@ -207,10 +201,6 @@
         },
         {
           "command": "journalr.topicBrowser.createTopic",
-          "when": "false"
-        },
-        {
-          "command": "journalr.topicBrowser.showArticle",
           "when": "false"
         }
       ],

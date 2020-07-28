@@ -18,7 +18,7 @@ async function articleToTreeItem(article: Article): Promise<vscode.TreeItem> {
     contextValue: "journalr.article",
     command: {
       title: "Show Article",
-      command: "journalr.topicBrowser.showArticle",
+      command: "journalr.general.showArticle",
       arguments: [article],
     },
   };

@@ -98,11 +98,6 @@ export function deleteNote(node: TopicEntry): void {
   vscode.workspace.fs.delete(article.uri, { recursive: false });
 }
 
-export async function showArticle(article: Article): Promise<void> {
-  const doc = await vscode.workspace.openTextDocument(article.uri);
-  await vscode.window.showTextDocument(doc);
-}
-
 export function register(
   context: vscode.ExtensionContext,
   configWatcher: ConfigWatcher
@@ -153,12 +148,6 @@ export function register(
       (node: TopicEntry) => {
         createTopic(node);
       }
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "journalr.topicBrowser.showArticle",
-      (article: Article) => showArticle(article)
     )
   );
 }

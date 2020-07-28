@@ -147,9 +147,6 @@ export class Article implements TopicEntry {
         .lexer(text.toString())
         .map(getTagWithPrefix)
         .reduce((acc, i) => acc.concat(i), []);
-    }).then((tags) => {
-      console.log(`Found tags: ${tags}`);
-      return tags;
     });
 
     this.tags = tags;

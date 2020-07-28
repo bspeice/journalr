@@ -43,7 +43,7 @@ class ArticleTagElement {
         contextValue: "journalr.articleTags.article",
         command: {
           title: "Show Article",
-          command: "journalr.articleTags.showArticle",
+          command: "journalr.general.showArticle",
           arguments: [a],
         },
       };

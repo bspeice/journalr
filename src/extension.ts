@@ -5,6 +5,7 @@ import * as articleLinks from "./view/articleLinks";
 import * as articleTags from "./view/articleTags";
 import * as attachment from "./command/attachment";
 import * as explorer from "./command/explorer";
+import * as general from "./command/general";
 import * as journal from "./command/journal";
 import * as palette from "./command/palette";
 import * as topicBrowser from "./command/topic_browser";
@@ -21,6 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   attachment.register(context, configWatcher);
   explorer.register(context, configWatcher);
+  general.register(context);
   journal.register(context, configWatcher);
   palette.register(context, dbWatcher, configWatcher);
   topicBrowser.register(context, configWatcher);
