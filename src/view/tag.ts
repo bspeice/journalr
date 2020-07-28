@@ -35,6 +35,7 @@ class TagBrowserProvider implements vscode.TreeDataProvider<ArticleTagElement> {
   getTreeItem(
     e: ArticleTagElement
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    // TODO: Change the context value prefix from "journal.articleTags"
     return e.toTreeItem();
   }
 

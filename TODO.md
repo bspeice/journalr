@@ -17,6 +17,3 @@
 - Some sort of warning for things that _look_ like internal links, but can't be resolved? Broken
   links detector?
 - Maybe base everything on `uri.fsPath` instead of full URI for easier comparisons?
-- Tag tracking; find text of the form `#my-tag` or `|my-tag` and link everything that uses that. There are actually two tag views desired:
-  1. Browse all tags that exist (having a hierarchy would be nice)
-  2. Find all articles that share a tag in common
