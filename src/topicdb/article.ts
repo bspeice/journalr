@@ -46,7 +46,7 @@ function getTags(t: marked.Token, tagPrefix: string): string[] {
       if (word.startsWith(tagPrefix)) {
         const tag = word.substring(tagPrefix.length);
 
-        if (tag.length > 0) {
+        if (tag.length > 0 && !tag.startsWith(tagPrefix)) {
           tags.add(tag);
         }
       }
