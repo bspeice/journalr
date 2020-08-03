@@ -12,8 +12,8 @@ function buildConfig(): JournalrConfig {
   const journalr = vscode.workspace.getConfiguration("journalr");
   return {
     attachmentFormat:
-      journalr.get("attachmentFormat") ?? "_attachments/YYYYMMDDhhmmss",
-    contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDD[.md]",
+      journalr.get("attachmentFormat") ?? "_attachments/YYYYMMDDHHmmss",
+    contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDDHHmmss[.md]",
     journalFormats: journalr.get("journalFormats") ?? [],
     ignoreGlobs: journalr.get("ignoreGlobs") ?? ["**/.*"],
     tagPrefix: journalr.get("tagPrefix") ?? "#",

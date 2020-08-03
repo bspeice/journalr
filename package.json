@@ -41,13 +41,13 @@
       "properties": {
         "journalr.attachmentFormat": {
           "type": "string",
-          "default": "[_attachments]/YYYYMMDDhhmmss",
-          "markdownDescription": "Format string (e.g. `[_attachments]/YYYYMMDDhhmmss`) for note attachments when imported from the \"Insert Attachment\" or \"Insert Image\" commands. See [`momentjs`](https://momentjs.com/docs/#/displaying/format/) for formatting options.\n\nFile extensions are preserved."
+          "default": "[.attachments]/YYYYMMDDHHmmss",
+          "markdownDescription": "Format string for attachments when imported from the \"Insert Attachment\" and \"Insert Image\" commands. See [`momentjs`](https://momentjs.com/docs/#/displaying/format/) for formatting options.\n\nFile extensions are preserved."
         },
         "journalr.contextMenuFormat": {
           "type": "string",
-          "default": "YYYYMMDDhhmmss[.md]",
-          "markdownDescription": "Format string (e.g. `YYYY/MM/hh_mm[.md]`) for note filenames when created from the \"Create Note\" context menu. See [`momentjs`](https://momentjs.com/docs/#/displaying/format/) for formatting options."
+          "default": "YYYYMMDDHHmmss[.md]",
+          "markdownDescription": "Format string for note filenames when created from the \"Create Note\" context menu. See [`momentjs`](https://momentjs.com/docs/#/displaying/format/) for formatting options."
         },
         "journalr.journalFormats": {
           "type": "array",
