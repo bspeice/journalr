@@ -30,33 +30,30 @@ function getLinks(t: marked.Token): string[] {
   return links;
 }
 
-function wordToTag(tagPrefix: string, word: string): string | undefined {
-  if (!word.startsWith(tagPrefix)) {
+function lineToTag(tagPrefix: string, line: string): string | undefined {
+  if (!line.startsWith(tagPrefix)) {
     return undefined;
   }
 
-  const withoutPrefix = word.substr(tagPrefix.length);
+  const withoutPrefix = line.substr(tagPrefix.length);
 
   // Tag should only appear once
   const containsTagAgain = withoutPrefix.includes(tagPrefix);
 
-  // Word must contain more text than just the tag
+  // Must contain more text than just the tag
   const hasNoText = withoutPrefix.length === 0;
 
-  if (containsTagAgain || hasNoText) {
+  // Must not contain leading spaces; trailing spaces are OK because you may
+  // want to include multiple tags in a line for markdown formatting:
+  // "#my-tag  \n#another-tag"
+  const startsNonAlnum = withoutPrefix.search(/^\W/) === 0;
+
+  if (containsTagAgain || hasNoText || startsNonAlnum) {
     return undefined;
   }
 
-  // It's a legit tag, but only include alphanumeric characters up to the first non-alnum.
-  // This only works with Latin-based character sets at the moment.
-  const match = withoutPrefix.match(/[A-Za-z0-9]+/);
-
-  if (match === null) {
-    return undefined;
-  } else {
-    // Because there was a match, we're guaranteed to have at least a first element to unpack
-    return match[0];
-  }
+  // It's a legit tag, but don't include whitespace
+  return withoutPrefix.trim();
 }
 
 // TODO: Strip punctuation. #like, seriously.
@@ -73,10 +70,10 @@ function getTags(t: marked.Token, tagPrefix: string): string[] {
 
   if ("text" in t) {
     t.text
-      .split(" ")
-      .map((word) => wordToTag(tagPrefix, word))
-      .filter((word) => word !== undefined)
-      .forEach((word) => tags.add(word as string));
+      .split("\n")
+      .map((line) => lineToTag(tagPrefix, line))
+      .filter((tag) => tag !== undefined)
+      .forEach((tag) => tags.add(tag as string));
   }
 
   return Array.from(tags);
