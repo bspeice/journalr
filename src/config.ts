@@ -13,7 +13,8 @@ function buildConfig(): JournalrConfig {
   return {
     attachmentFormat:
       journalr.get("attachmentFormat") ?? "_attachments/YYYYMMDDHHmmss",
-    contextMenuFormat: journalr.get("contextMenuFormat") ?? "YYYYMMDDHHmmss[.md]",
+    contextMenuFormat:
+      journalr.get("contextMenuFormat") ?? "YYYYMMDDHHmmss[.md]",
     journalFormats: journalr.get("journalFormats") ?? [],
     ignoreGlobs: journalr.get("ignoreGlobs") ?? ["**/.*"],
     tagPrefix: journalr.get("tagPrefix") ?? "#",

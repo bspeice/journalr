@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import * as utils from "../utils";
 import { TopicEntry, EntryType, Topic } from ".";
 import { relative } from "path";
+import { workerData } from "worker_threads";
 
 function getLinks(t: marked.Token): string[] {
   const links = [];
@@ -29,6 +30,35 @@ function getLinks(t: marked.Token): string[] {
   return links;
 }
 
+function wordToTag(tagPrefix: string, word: string): string | undefined {
+  if (!word.startsWith(tagPrefix)) {
+    return undefined;
+  }
+
+  const withoutPrefix = word.substr(tagPrefix.length);
+
+  // Tag should only appear once
+  const containsTagAgain = withoutPrefix.includes(tagPrefix);
+
+  // Word must contain more text than just the tag
+  const hasNoText = withoutPrefix.length === 0;
+
+  if (containsTagAgain || hasNoText) {
+    return undefined;
+  }
+
+  // It's a legit tag, but only include alphanumeric characters up to the first non-alnum.
+  // This only works with Latin-based character sets at the moment.
+  const match = withoutPrefix.match(/[A-Za-z0-9]+/);
+
+  if (match === null) {
+    return undefined;
+  } else {
+    // Because there was a match, we're guaranteed to have at least a first element to unpack
+    return match[0];
+  }
+}
+
 // TODO: Strip punctuation. #like, seriously.
 function getTags(t: marked.Token, tagPrefix: string): string[] {
   const tags = new Set<string>();
@@ -42,15 +72,11 @@ function getTags(t: marked.Token, tagPrefix: string): string[] {
   }
 
   if ("text" in t) {
-    for (const word of t.text.split(" ")) {
-      if (word.startsWith(tagPrefix)) {
-        const tag = word.substring(tagPrefix.length);
-
-        if (tag.length > 0 && !tag.startsWith(tagPrefix)) {
-          tags.add(tag);
-        }
-      }
-    }
+    t.text
+      .split(" ")
+      .map((word) => wordToTag(tagPrefix, word))
+      .filter((word) => word !== undefined)
+      .forEach((word) => tags.add(word as string));
   }
 
   return Array.from(tags);
