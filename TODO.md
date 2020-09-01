@@ -17,3 +17,4 @@
 - Some sort of warning for things that _look_ like internal links, but can't be resolved? Broken
   links detector?
 - Maybe base everything on `uri.fsPath` instead of full URI for easier comparisons?
+- Copy note ID from links/tags views
