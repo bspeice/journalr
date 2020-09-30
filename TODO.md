@@ -18,3 +18,4 @@
   links detector?
 - Maybe base everything on `uri.fsPath` instead of full URI for easier comparisons?
 - Copy note ID from links/tags views
+- Create root-level notes
