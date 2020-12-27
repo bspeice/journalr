@@ -19,3 +19,5 @@
 - Maybe base everything on `uri.fsPath` instead of full URI for easier comparisons?
 - Copy note ID from links/tags views
 - Create root-level notes
+- Attachment naming rules - use filename as alt text (sans extension)
+- Detect orphaned attachments
