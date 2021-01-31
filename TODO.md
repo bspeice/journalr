@@ -15,3 +15,4 @@
 - Create root-level notes
 - Attachment naming rules - use filename as alt text (sans extension)
 - Detect orphaned attachments
+- Moment.js replacment
