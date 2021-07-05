@@ -15,4 +15,5 @@
 - Create root-level notes
 - Attachment naming rules - use filename as alt text (sans extension)
 - Detect orphaned attachments
-- Moment.js replacment
+- Moment.js replacment (Temporal?)
+- Archive/Hide note - replace title with a leading '.'
