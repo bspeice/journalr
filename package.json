@@ -317,7 +317,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "marked": "^2.0.0",
+    "marked": "^4.0.10",
     "moment": "^2.27.0"
   }
 }
